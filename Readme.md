@@ -1,7 +1,7 @@
 # Личный проект «Киноман» [![Build status][travis-image]][travis-url]
 
 * Студент: [Kirill Cherepanov](https://up.htmlacademy.ru/ecmascript/10/user/691731).
-* Наставник: `Неизвестно`.
+* Наставник: `Александр Пасунько`.
 
 ---
 
