@@ -1,3 +1,6 @@
+import {createElement} from '../util.js';
+import {generateComments} from '../mock/comments.js';
+
 const generateFilmGenere = (generes) => {
   return generes
     .map((genere) => {
@@ -6,13 +9,41 @@ const generateFilmGenere = (generes) => {
     .join(`\n`);
 };
 
-export const filmDetailsTemplate = (card) => {
+const createCommentMarkup = (comment) => {
+  const {textComment, date, author, emoji} = comment;
+  return (
+    `<li class="film-details__comment">
+      <span class="film-details__comment-emoji">
+        <img src="${emoji}" width="55" height="55" alt="emoji">
+      </span>
+      <div>
+        <p class="film-details__comment-text">${textComment}</p>
+        <p class="film-details__comment-info">
+          <span class="film-details__comment-author">${author}</span>
+          <span class="film-details__comment-day">${date}</span>
+          <button class="film-details__comment-delete">Delete</button>
+        </p>
+      </div>
+    </li>`
+  );
+};
+
+const generateCommentsList = (comments) => {
+  return comments
+    .map((comment) => {
+      return createCommentMarkup(comment);
+    })
+    .join(`\n`);
+};
+
+const filmDetailsTemplate = (card) => {
   const {filmName, img, filmRating, filmDate, filmDuration, filmStyles, filmDescription, commentsCount} = card;
 
   const generes = generateFilmGenere(Array.from(filmStyles));
+  const comments = generateCommentsList(generateComments(commentsCount));
 
-  return (`
-    <section class="film-details">
+  return (
+    `<section class="film-details">
       <form class="film-details__inner" action="" method="get">
         <div class="form-details__top-container">
           <div class="film-details__close">
@@ -92,6 +123,7 @@ export const filmDetailsTemplate = (card) => {
             <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsCount}</span></h3>
 
             <ul class="film-details__comments-list">
+            ${comments}
             </ul>
 
             <div class="film-details__new-comment">
@@ -126,6 +158,29 @@ export const filmDetailsTemplate = (card) => {
           </section>
         </div>
       </form>
-    </section>
-  `);
+    </section>`
+  );
 };
+
+export default class FilmDetails {
+  constructor(card) {
+    this._card = card;
+    this._element = null;
+  }
+
+  getTemplate() {
+    return filmDetailsTemplate(this._card);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
