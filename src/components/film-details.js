@@ -1,6 +1,10 @@
 import {createElement} from '../util.js';
 import {generateComments} from '../mock/comments.js';
 
+const MONTH_NAME = [
+  `Janury`, `Febrary`, `March`, `April`, `May`, `June`, `Julay`, `August`, `September`, `October`, `November`, `December`
+];
+
 const generateFilmGenere = (generes) => {
   return generes
     .map((genere) => {
@@ -83,7 +87,7 @@ const filmDetailsTemplate = (card) => {
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Release Date</td>
-                  <td class="film-details__cell">${filmDate.day} ${filmDate.month} ${filmDate.year}</td>
+                  <td class="film-details__cell">${filmDate.day} ${MONTH_NAME[filmDate.month]} ${filmDate.year}</td>
                 </tr>
                 <tr class="film-details__row">
                   <td class="film-details__term">Runtime</td>

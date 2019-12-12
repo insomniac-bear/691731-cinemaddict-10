@@ -18,7 +18,7 @@ export const setFilter = (array, value) => {
       filteredArray.sort((a, b) => {
         if (b.filmDate.year - a.filmDate.year === 0 && b.filmDate.month - a.filmDate.month !== 0) {
           return b.filmDate.month - a.filmDate.month;
-        } else if (b.filmDate.month - a.filmDate.month === 0) {
+        } else if (b.filmDate.year - a.filmDate.year === 0 && b.filmDate.month - a.filmDate.month === 0) {
           return b.filmDate.day - a.filmDate.day;
         } else {
           return b.filmDate.year - a.filmDate.year;

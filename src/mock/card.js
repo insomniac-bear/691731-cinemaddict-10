@@ -40,10 +40,6 @@ const Generes = [
   `science fiction`
 ];
 
-const MONTH_NAME = [
-  `Janury`, `Febrary`, `March`, `April`, `May`, `June`, `Julay`, `August`, `September`, `October`, `November`, `December`
-];
-
 const generateFilmDuration = () => {
   return `${getRandomIntegerNumber(0, 2)}h ${getRandomIntegerNumber(0, 59)}m`;
 };
@@ -73,7 +69,7 @@ const generateFilmDate = () => {
 
   return {
     day: setFormatDate(date.getDate()),
-    month: MONTH_NAME[date.getMonth()],
+    month: date.getMonth(),
     year: date.getFullYear(),
   };
 };
