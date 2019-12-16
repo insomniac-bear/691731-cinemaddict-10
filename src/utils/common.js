@@ -10,6 +10,14 @@ export const getRandomArrayItem = (array) => {
   return array[randomIndex];
 };
 
+export const setFormatDate = (date) => {
+  if (date < 10) {
+    return `0${date}`;
+  } else {
+    return `${date}`;
+  }
+};
+
 export const setFilter = (array, value) => {
   const filteredArray = array.slice();
 
@@ -48,41 +56,4 @@ export const setFilter = (array, value) => {
   }
 
   return filteredArray;
-};
-
-export const clearElements = (parrentElement, deletedElements) => {
-  for (let i = 0; i < deletedElements.length; i++) {
-    parrentElement.removeChild(deletedElements[i]);
-  }
-};
-
-export const setFormatDate = (date) => {
-  if (date < 10) {
-    return `0${date}`;
-  } else {
-    return `${date}`;
-  }
-};
-
-export const RenderPosition = {
-  AFTERBEGIN: `afterbegin`,
-  BEFOREEND: `beforeend`,
-};
-
-export const createElement = (template) => {
-  const newElement = document.createElement(`div`);
-  newElement.innerHTML = template;
-
-  return newElement.firstChild;
-};
-
-export const render = (container, element, place) => {
-  switch (place) {
-    case RenderPosition.AFTERBEGIN:
-      container.prepend(element);
-      break;
-    case RenderPosition.BEFOREEND:
-      container.append(element);
-      break;
-  }
 };
