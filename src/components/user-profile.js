@@ -1,5 +1,5 @@
-import {createElement} from '../util.js';
-import {getRandomIntegerNumber} from '../util.js';
+import AbstractComponent from './abstract-component.js';
+import {getRandomIntegerNumber} from '../utils/common.js';
 
 const generateUserStatus = () => {
   return getRandomIntegerNumber(0, 100);
@@ -16,24 +16,8 @@ const createUserProfileTemplate = () => {
   );
 };
 
-export default class UserProfile {
-  constructor() {
-    this._element = null;
-  }
-
+export default class UserProfile extends AbstractComponent {
   getTemplate() {
     return createUserProfileTemplate();
-  }
-
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
   }
 }

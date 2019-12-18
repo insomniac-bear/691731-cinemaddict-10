@@ -1,6 +1,5 @@
 import {TextPattern} from '../const.js';
-import {getRandomIntegerNumber} from '../util.js';
-import {getRandomArrayItem, setFormatDate} from '../util.js';
+import {getRandomIntegerNumber, getRandomArrayItem, setFormatDate} from '../utils/common.js';
 
 const SENTENCE_COUNT = 3;
 

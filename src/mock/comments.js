@@ -1,5 +1,5 @@
 import {TextPattern} from '../const.js';
-import {getRandomArrayItem, getRandomIntegerNumber, setFormatDate} from '../util.js';
+import {getRandomArrayItem, getRandomIntegerNumber, setFormatDate} from '../utils/common.js';
 
 const COMMENT_LENGTH = 4;
 
