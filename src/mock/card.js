@@ -89,6 +89,9 @@ const generateFilmCards = () => {
       filmDuration: generateFilmDuration(),
       filmStyles: new Set(generateFilmStyles(Generes)),
       filmDescription: generateFilmDescription(),
+      isWatchList: Math.random() > 0.5,
+      isWatched: Math.random() > 0.5,
+      isFavorite: Math.random() > 0.5,
       commentsCount: getRandomIntegerNumber(0, 10),
     };
   });
