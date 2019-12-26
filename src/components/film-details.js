@@ -113,119 +113,102 @@ const createFilmDetailsTemplate = (card, options = {}) => {
   const comments = generateCommentsList(generateComments(commentsCount));
 
   return (
-    `<section class="film-details">
-      <form class="film-details__inner" action="" method="get">
-        <div class="form-details__top-container">
-          <div class="film-details__close">
-            <button class="film-details__close-btn" type="button">close</button>
-          </div>
-          <div class="film-details__info-wrap">
-            <div class="film-details__poster">
-              <img class="film-details__poster-img" src="${img}" alt="">
-
-              <p class="film-details__age">18+</p>
-            </div>
-
-            <div class="film-details__info">
-              <div class="film-details__info-head">
-                <div class="film-details__title-wrap">
-                  <h3 class="film-details__title">${filmName}</h3>
-                  <p class="film-details__title-original">Original: ${filmName}</p>
-                </div>
-
-                <div class="film-details__rating">
-                  <p class="film-details__total-rating">${filmRating}</p>
-                </div>
-              </div>
-
-              <table class="film-details__table">
-                <tr class="film-details__row">
-                  <td class="film-details__term">Director</td>
-                  <td class="film-details__cell">Anthony Mann</td>
-                </tr>
-                <tr class="film-details__row">
-                  <td class="film-details__term">Writers</td>
-                  <td class="film-details__cell">Anne Wigton, Heinz Herald, Richard Weil</td>
-                </tr>
-                <tr class="film-details__row">
-                  <td class="film-details__term">Actors</td>
-                  <td class="film-details__cell">Erich von Stroheim, Mary Beth Hughes, Dan Duryea</td>
-                </tr>
-                <tr class="film-details__row">
-                  <td class="film-details__term">Release Date</td>
-                  <td class="film-details__cell">${filmDate.day} ${MONTH_NAME[filmDate.month]} ${filmDate.year}</td>
-                </tr>
-                <tr class="film-details__row">
-                  <td class="film-details__term">Runtime</td>
-                  <td class="film-details__cell">${filmDuration}</td>
-                </tr>
-                <tr class="film-details__row">
-                  <td class="film-details__term">Country</td>
-                  <td class="film-details__cell">USA</td>
-                </tr>
-                <tr class="film-details__row">
-                  <td class="film-details__term">${generes.length === 1 ? `Genere` : `Generes`}</td>
-                  <td class="film-details__cell">
-                    ${generes}
-                </tr>
-              </table>
-
-              <p class="film-details__film-description">
-                ${filmDescription}
-              </p>
-            </div>
-          </div>
-
-          <section class="film-details__controls">
-            ${createCheckboxMarkup(`watchlist`, isWatchList)}
-            ${createCheckboxMarkup(`watched`, isWatched)}
-            ${createCheckboxMarkup(`favorite`, isFavorite)}
-          </section>
+    `<form class="film-details__inner" action="" method="get">
+      <div class="form-details__top-container">
+        <div class="film-details__close">
+          <button class="film-details__close-btn" type="button">close</button>
         </div>
-
-        ${isWatched ? createFilmDetailsReitingMarkup(img, filmName) : ``}
-
-        <div class="form-details__bottom-container">
-          <section class="film-details__comments-wrap">
-            <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsCount}</span></h3>
-
-            <ul class="film-details__comments-list">
-            ${comments}
-            </ul>
-
-            <div class="film-details__new-comment">
-              <div for="add-emoji" class="film-details__add-emoji-label"></div>
-
-              <label class="film-details__comment-label">
-                <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here"    name="comment"></textarea>
+        <div class="film-details__info-wrap">
+          <div class="film-details__poster">
+            <img class="film-details__poster-img" src="${img}" alt="">
+            <p class="film-details__age">18+</p>
+          </div>
+          <div class="film-details__info">
+            <div class="film-details__info-head">
+              <div class="film-details__title-wrap">
+                <h3 class="film-details__title">${filmName}</h3>
+                <p class="film-details__title-original">Original: ${filmName}</p>
+              </div>
+              <div class="film-details__rating">
+                <p class="film-details__total-rating">${filmRating}</p>
+              </div>
+            </div>
+            <table class="film-details__table">
+              <tr class="film-details__row">
+                <td class="film-details__term">Director</td>
+                <td class="film-details__cell">Anthony Mann</td>
+              </tr>
+              <tr class="film-details__row">
+                <td class="film-details__term">Writers</td>
+                <td class="film-details__cell">Anne Wigton, Heinz Herald, Richard Weil</td>
+              </tr>
+              <tr class="film-details__row">
+                <td class="film-details__term">Actors</td>
+                <td class="film-details__cell">Erich von Stroheim, Mary Beth Hughes, Dan Duryea</td>
+              </tr>
+              <tr class="film-details__row">
+                <td class="film-details__term">Release Date</td>
+                <td class="film-details__cell">${filmDate.day} ${MONTH_NAME[filmDate.month]} ${filmDate.year}</td>
+              </tr>
+              <tr class="film-details__row">
+                <td class="film-details__term">Runtime</td>
+                <td class="film-details__cell">${filmDuration}</td>
+              </tr>
+              <tr class="film-details__row">
+                <td class="film-details__term">Country</td>
+                <td class="film-details__cell">USA</td>
+              </tr>
+              <tr class="film-details__row">
+                <td class="film-details__term">${generes.length === 1 ? `Genere` : `Generes`}</td>
+                <td class="film-details__cell">
+                  ${generes}
+              </tr>
+            </table>
+            <p class="film-details__film-description">
+              ${filmDescription}
+            </p>
+          </div>
+        </div>
+        <section class="film-details__controls">
+          ${createCheckboxMarkup(`watchlist`, isWatchList)}
+          ${createCheckboxMarkup(`watched`, isWatched)}
+          ${createCheckboxMarkup(`favorite`, isFavorite)}
+        </section>
+      </div>
+      ${isWatched ? createFilmDetailsReitingMarkup(img, filmName) : ``}
+      <div class="form-details__bottom-container">
+        <section class="film-details__comments-wrap">
+          <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">{commentsCount}</span></h3>
+          <ul class="film-details__comments-list">
+          ${comments}
+          </ul>
+          <div class="film-details__new-comment">
+            <div for="add-emoji" class="film-details__add-emoji-label"></div>
+            <label class="film-details__comment-label">
+              <textarea class="film-details__comment-input" placeholder="Select reaction below and write commenthere"    name="comment"></textarea>
+            </label>
+            <div class="film-details__emoji-list">
+              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-smile"    value="sleeping">
+              <label class="film-details__emoji-label" for="emoji-smile">
+                <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
               </label>
-
-              <div class="film-details__emoji-list">
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile"    value="sleeping">
-                <label class="film-details__emoji-label" for="emoji-smile">
-                  <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
-                </label>
-
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping"     value="neutral-face">
-                <label class="film-details__emoji-label" for="emoji-sleeping">
-                  <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
-                </label>
-
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-gpuke"    value="grinning">
-                <label class="film-details__emoji-label" for="emoji-gpuke">
-                  <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
-                </label>
-
-                <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry"    value="grinning">
-                <label class="film-details__emoji-label" for="emoji-angry">
-                  <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
-                </label>
-              </div>
+              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-sleeping"     value="neutral-face">
+              <label class="film-details__emoji-label" for="emoji-sleeping">
+                <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
+              </label>
+              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-gpuke"    value="grinning">
+              <label class="film-details__emoji-label" for="emoji-gpuke">
+                <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
+              </label>
+              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-angry"    value="grinning">
+              <label class="film-details__emoji-label" for="emoji-angry">
+                <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
+              </label>
             </div>
-          </section>
-        </div>
-      </form>
-    </section>`
+          </div>
+        </section>
+      </div>
+    </form>`
   );
 };
 
@@ -268,18 +251,21 @@ export default class FilmDetails extends AbstractSmartComponent {
     element.querySelector(`#watchlist`)
       .addEventListener(`change`, () => {
         this._isWatchList = !this._isWatchList;
+
         this.rerender();
       });
 
     element.querySelector(`#watched`)
       .addEventListener(`change`, () => {
         this._isWatched = !this._isWatched;
+
         this.rerender();
       });
 
     element.querySelector(`#favorite`)
       .addEventListener(`change`, () => {
         this._isFavorite = !this._isFavorite;
+
         this.rerender();
       });
   }

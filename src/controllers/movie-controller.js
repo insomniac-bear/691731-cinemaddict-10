@@ -1,7 +1,8 @@
 import FilmCardComponent from '../components/film-card.js';
 import FilmDetailsComponent from '../components/film-details.js';
+import FilmDetailsContainerComponent from '../components/film-details-container.js';
 
-import {render, RenderPosition, remove} from '../utils/render.js';
+import {render, RenderPosition, remove, replace} from '../utils/render.js';
 
 const Mode = {
   DEFAULT: `default`,
@@ -16,6 +17,7 @@ export default class MovieController {
 
     this._filmCardComponent = null;
     this._filmDetailsComponent = null;
+    this._filmDetailsContainer = null;
     this._mode = Mode.DEFAULT;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
@@ -23,25 +25,66 @@ export default class MovieController {
 
   // Публичный метод добавления карточки фильма
   render(card) {
+    const oldFilmCardComponent = this._filmCardComponent;
+    const oldFilmDetailsComponent = this._filmDetailsComponent;
+
     this._filmCardComponent = new FilmCardComponent(card);
     this._filmDetailsComponent = new FilmDetailsComponent(card);
 
     // Подписываемся на клики по карточке фильма
     this._filmCardComponent.setOpenDetailsButtonsClickHandler(() => {
       const popupPlace = document.querySelector(`body`);
+      this._filmDetailsContainer = new FilmDetailsContainerComponent();
+      render(popupPlace, this._filmDetailsContainer, RenderPosition.BEFOREEND);
 
       this._onViewChange();
-      render(popupPlace, this._filmDetailsComponent, RenderPosition.BEFOREEND);
+
+      render(this._filmDetailsContainer.getElement(), this._filmDetailsComponent, RenderPosition.BEFOREEND);
+
       this._mode = Mode.OPENED;
-      this._filmDetailsComponent.setCloseButtonClickHandler(() => {
+
+      // Подписываемся на кнопки попапа
+      this._filmDetailsComponent.setCloseButtonClickHandler((evt) => {
+        evt.preventDefault();
         remove(this._filmDetailsComponent);
+        remove(this._filmDetailsContainer);
         this._mode = Mode.DEFAULT;
         document.removeEventListener(`keydown`, this._onEscKeyDown);
       });
       document.addEventListener(`keydown`, this._onEscKeyDown);
     });
 
-    render(this._container, this._filmCardComponent, RenderPosition.BEFOREEND);
+    if (oldFilmCardComponent) {
+      replace(this._filmCardComponent, oldFilmCardComponent);
+    } else {
+      render(this._container, this._filmCardComponent, RenderPosition.BEFOREEND);
+    }
+
+    if (oldFilmDetailsComponent) {
+      replace(this._filmCardComponent, oldFilmCardComponent);
+    }
+
+    // Подписываемся на клик по кнопке addToWatchList
+    this._filmCardComponent.setWatchListButton((evt) => {
+      evt.preventDefault();
+      this._onDataChange(this, card, Object.assign({}, card, {
+        isWatchList: !card.isWatchList,
+      }));
+    });
+    // Подписываемся на клик по кнопке addToWatched
+    this._filmCardComponent.setWatchedButton((evt) => {
+      evt.preventDefault();
+      this._onDataChange(this, card, Object.assign({}, card, {
+        isWatched: !card.isWatched,
+      }));
+    });
+    // Подписываемся на клик по кнопке addToFavorite
+    this._filmCardComponent.setFavoriteButton((evt) => {
+      evt.preventDefault();
+      this._onDataChange(this, card, Object.assign({}, card, {
+        isFavorite: !card.isFavorite,
+      }));
+    });
   }
 
   setDefaultView() {
@@ -56,26 +99,8 @@ export default class MovieController {
 
     if (isEscKey) {
       remove(this._filmDetailsComponent);
+      remove(this._filmDetailsContainer);
       document.removeEventListener(`keydown`, this._onEscKeyDown);
     }
-  }
-
-  // Функции обработчики событий на карточках в списке
-  _addToWatchList(card) {
-    this._onDataChange(this, card, Object.assign({}, card, {
-      isWatchList: !card.isWatchList,
-    }));
-  }
-
-  _addToWatched(card) {
-    this._onDataChange(this, card, Object.assign({}, card, {
-      isWatched: !card.isWatched,
-    }));
-  }
-
-  _addToFavorite(card) {
-    this._onDataChange(this, card, Object.assign({}, card, {
-      isFavorite: !card.isFavorite,
-    }));
   }
 }
