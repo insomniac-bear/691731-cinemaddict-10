@@ -234,9 +234,9 @@ export default class FilmDetails extends AbstractSmartComponent {
     super();
 
     this._card = card;
-    this._isWatchList = Object.assign({}, card.isWatchList);
-    this._isWatched = Object.assign({}, card.isWatched);
-    this._isFavorite = Object.assign({}, card.isFavorite);
+    this._isFavorite = card.isFavorite;
+    this._isWatchList = card.isWatchList;
+    this._isWatched = card.isWatched;
 
     this._closeHandler = null;
     this._subscribeOnEvents();
@@ -268,19 +268,19 @@ export default class FilmDetails extends AbstractSmartComponent {
     element.querySelector(`#watchlist`)
       .addEventListener(`change`, () => {
         this._isWatchList = !this._isWatchList;
-        this.render();
+        this.rerender();
       });
 
     element.querySelector(`#watched`)
       .addEventListener(`change`, () => {
         this._isWatched = !this._isWatched;
-        this.render();
+        this.rerender();
       });
 
     element.querySelector(`#favorite`)
       .addEventListener(`change`, () => {
         this._isFavorite = !this._isFavorite;
-        this.render();
+        this.rerender();
       });
   }
 }

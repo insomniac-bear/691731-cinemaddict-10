@@ -5,7 +5,7 @@ export default class AbstractSmartComponent extends AbstractComponent {
     throw new Error(`Abstract method not implemented: recoveryListener`);
   }
 
-  render() {
+  rerender() {
     const oldElemment = this.getElement();
     const parent = oldElemment.parentElement;
 
