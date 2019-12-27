@@ -117,7 +117,7 @@ export default class PageController {
       this._filmsListContainerElement.innerHTML = ``;
       remove(this._buttonShowMoreComponent);
 
-      renderCardsList(this._filmsListContainerElement, sortedCards.slice(0, this._showingCardsFilmCount));
+      renderCardsList(this._filmsListContainerElement, sortedCards.slice(0, this._showingCardsFilmCount), this._onDataChange, this._onViewChange);
       this._renderLoadMoreButton();
     });
   }
@@ -166,13 +166,7 @@ export default class PageController {
     switch (value) {
       case `date`:
         filteredArray.sort((a, b) => {
-          if (b.filmDate.year - a.filmDate.year === 0 && b.filmDate.month - a.filmDate.month !== 0) {
-            return b.filmDate.month - a.filmDate.month;
-          } else if (b.filmDate.year - a.filmDate.year === 0 && b.filmDate.month - a.filmDate.month === 0) {
-            return b.filmDate.day - a.filmDate.day;
-          } else {
-            return b.filmDate.year - a.filmDate.year;
-          }
+          return b.filmDate - a.filmDate;
         });
         break;
       case `rating`:

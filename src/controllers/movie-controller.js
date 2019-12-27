@@ -38,9 +38,9 @@ export default class MovieController {
       this._filmDetailsContainer = new FilmDetailsContainerComponent();
       render(popupPlace, this._filmDetailsContainer, RenderPosition.BEFOREEND);
 
-      this._onViewChange();
-
       render(this._filmDetailsContainer.getElement(), this._filmDetailsComponent, RenderPosition.BEFOREEND);
+
+      this._onViewChange();
 
       this._mode = Mode.OPENED;
 

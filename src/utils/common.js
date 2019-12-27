@@ -1,5 +1,3 @@
-import moment from 'moment';
-
 export const getRandomIntegerNumber = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -18,7 +16,7 @@ export const setFilter = (array, value) => {
   switch (value) {
     case `Sort by date`:
       filteredArray.sort((a, b) => {
-        return moment(b.filmDate).isAfter(a.filmDate);
+        return b.filmDate - a.filmDate;
       });
       break;
     case `Sort by rating`:
