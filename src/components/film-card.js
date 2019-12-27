@@ -1,4 +1,5 @@
 import AbstractComponent from './abstract-component.js';
+import moment from 'moment';
 
 const createButtonMarkup = (name, isActive) => {
   const selectStyle = (nameButton) => {
@@ -42,7 +43,7 @@ const createCardFilmTemplate = (card) => {
       <h3 class="film-card__title">${filmName}</h3>
       <p class="film-card__rating">${filmRating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${filmDate.year}</span>
+        <span class="film-card__year">${moment(filmDate).format(`YYYY`)}</span>
         <span class="film-card__duration">${filmDuration}</span>
         <span class="film-card__genre">${generes[0]}</span>
       </p>

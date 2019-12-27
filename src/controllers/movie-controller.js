@@ -21,6 +21,7 @@ export default class MovieController {
     this._mode = Mode.DEFAULT;
 
     this._onEscKeyDown = this._onEscKeyDown.bind(this);
+    this._onClickCloseButton = this._onClickCloseButton.bind(this);
   }
 
   // Публичный метод добавления карточки фильма
@@ -44,24 +45,14 @@ export default class MovieController {
       this._mode = Mode.OPENED;
 
       // Подписываемся на кнопки попапа
-      this._filmDetailsComponent.setCloseButtonClickHandler((evt) => {
-        evt.preventDefault();
-        remove(this._filmDetailsComponent);
-        remove(this._filmDetailsContainer);
-        this._mode = Mode.DEFAULT;
-        document.removeEventListener(`keydown`, this._onEscKeyDown);
-      });
+      this._filmDetailsComponent.setCloseButtonClickHandler((evt) => this._onClickCloseButton(evt));
       document.addEventListener(`keydown`, this._onEscKeyDown);
     });
 
-    if (oldFilmCardComponent) {
+    if (oldFilmCardComponent && oldFilmDetailsComponent) {
       replace(this._filmCardComponent, oldFilmCardComponent);
     } else {
       render(this._container, this._filmCardComponent, RenderPosition.BEFOREEND);
-    }
-
-    if (oldFilmDetailsComponent) {
-      replace(this._filmCardComponent, oldFilmCardComponent);
     }
 
     // Подписываемся на клик по кнопке addToWatchList
@@ -93,14 +84,20 @@ export default class MovieController {
     }
   }
 
+  _onClickCloseButton(evt) {
+    evt.preventDefault();
+    remove(this._filmDetailsComponent);
+    remove(this._filmDetailsContainer);
+    this._mode = Mode.DEFAULT;
+    document.removeEventListener(`keydown`, this._onEscKeyDown);
+  }
+
   // Функция удаления попапа нажатием клавиши Esc
   _onEscKeyDown(evt) {
     const isEscKey = evt.key === `Escape` || evt.key === `Esc`;
 
     if (isEscKey) {
-      remove(this._filmDetailsComponent);
-      remove(this._filmDetailsContainer);
-      document.removeEventListener(`keydown`, this._onEscKeyDown);
+      this._onClickCloseButton(evt);
     }
   }
 }

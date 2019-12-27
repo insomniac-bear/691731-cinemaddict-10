@@ -1,3 +1,5 @@
+import moment from 'moment';
+
 export const getRandomIntegerNumber = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max);
@@ -10,27 +12,13 @@ export const getRandomArrayItem = (array) => {
   return array[randomIndex];
 };
 
-export const setFormatDate = (date) => {
-  if (date < 10) {
-    return `0${date}`;
-  } else {
-    return `${date}`;
-  }
-};
-
 export const setFilter = (array, value) => {
   const filteredArray = array.slice();
 
   switch (value) {
     case `Sort by date`:
       filteredArray.sort((a, b) => {
-        if (b.filmDate.year - a.filmDate.year === 0 && b.filmDate.month - a.filmDate.month !== 0) {
-          return b.filmDate.month - a.filmDate.month;
-        } else if (b.filmDate.year - a.filmDate.year === 0 && b.filmDate.month - a.filmDate.month === 0) {
-          return b.filmDate.day - a.filmDate.day;
-        } else {
-          return b.filmDate.year - a.filmDate.year;
-        }
+        return moment(b.filmDate).isAfter(a.filmDate);
       });
       break;
     case `Sort by rating`:

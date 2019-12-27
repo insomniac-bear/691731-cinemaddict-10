@@ -1,9 +1,6 @@
 import AbstractSmartComponent from './abstract-smart-component.js';
 import {generateComments} from '../mock/comments.js';
-
-const MONTH_NAME = [
-  `Janury`, `Febrary`, `March`, `April`, `May`, `June`, `Julay`, `August`, `September`, `October`, `November`, `December`
-];
+import moment from 'moment';
 
 const generateFilmGenere = (generes) => {
   return generes
@@ -24,7 +21,7 @@ const createCommentMarkup = (comment) => {
         <p class="film-details__comment-text">${textComment}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
-          <span class="film-details__comment-day">${date}</span>
+          <span class="film-details__comment-day">${moment(date).format(`YYYY/MM/DD HH:MM`)}</span>
           <button class="film-details__comment-delete">Delete</button>
         </p>
       </div>
@@ -105,9 +102,9 @@ const generateCommentsList = (comments) => {
     .join(`\n`);
 };
 
-const createFilmDetailsTemplate = (card, options = {}) => {
-  const {filmName, img, filmRating, filmDate, filmDuration, filmStyles, filmDescription, commentsCount} = card;
-  const {isWatchList, isWatched, isFavorite} = options;
+const createFilmDetailsTemplate = (card, emojiComment = {}) => {
+  const {filmName, img, filmRating, filmDate, filmDuration, filmStyles, filmDescription, isWatchList, isWatched, isFavorite, commentsCount} = card;
+  const {isEmoji, emojiUrl} = emojiComment;
 
   const generes = generateFilmGenere(Array.from(filmStyles));
   const comments = generateCommentsList(generateComments(commentsCount));
@@ -148,7 +145,7 @@ const createFilmDetailsTemplate = (card, options = {}) => {
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Release Date</td>
-                <td class="film-details__cell">${filmDate.day} ${MONTH_NAME[filmDate.month]} ${filmDate.year}</td>
+                <td class="film-details__cell">${moment(filmDate).format(`DD MMMM YYYY`)}</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Runtime</td>
@@ -183,7 +180,9 @@ const createFilmDetailsTemplate = (card, options = {}) => {
           ${comments}
           </ul>
           <div class="film-details__new-comment">
-            <div for="add-emoji" class="film-details__add-emoji-label"></div>
+            <div for="add-emoji" class="film-details__add-emoji-label">
+              ${isEmoji ? `<img src="${emojiUrl}" width="55" height="55" alt="emoji">` : ``}
+            </div>
             <label class="film-details__comment-label">
               <textarea class="film-details__comment-input" placeholder="Select reaction below and write commenthere"    name="comment"></textarea>
             </label>
@@ -217,20 +216,17 @@ export default class FilmDetails extends AbstractSmartComponent {
     super();
 
     this._card = card;
-    this._isFavorite = card.isFavorite;
-    this._isWatchList = card.isWatchList;
-    this._isWatched = card.isWatched;
 
+    this._emojiInComment = {
+      isEmoji: false,
+      emojiUrl: null,
+    };
     this._closeHandler = null;
     this._subscribeOnEvents();
   }
 
   getTemplate() {
-    return createFilmDetailsTemplate(this._card, {
-      isWatchList: this._isWatchList,
-      isWatched: this._isWatched,
-      isFavorite: this._isFavorite,
-    });
+    return createFilmDetailsTemplate(this._card, this._emojiInComment);
   }
 
   recoveryListeners() {
@@ -250,23 +246,30 @@ export default class FilmDetails extends AbstractSmartComponent {
 
     element.querySelector(`#watchlist`)
       .addEventListener(`change`, () => {
-        this._isWatchList = !this._isWatchList;
-
-        this.rerender();
+        this._card.isWatchList = !this._card.isWatchList;
       });
 
     element.querySelector(`#watched`)
       .addEventListener(`change`, () => {
-        this._isWatched = !this._isWatched;
+        this._card.isWatched = !this._card.isWatched;
 
         this.rerender();
       });
 
     element.querySelector(`#favorite`)
       .addEventListener(`change`, () => {
-        this._isFavorite = !this._isFavorite;
+        this._card.isFavorite = !this._card.isFavorite;
+      });
 
-        this.rerender();
+    element.querySelector(`.film-details__emoji-list`)
+      .addEventListener(`click`, (evt) => {
+        evt.preventDefault();
+        const target = evt.target;
+        if (target.getAttribute(`alt`) === `emoji`) {
+          this._emojiInComment.isEmoji = true;
+          this._emojiInComment.emojiUrl = target.getAttribute(`src`);
+          this.rerender();
+        }
       });
   }
 }

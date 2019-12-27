@@ -8,8 +8,6 @@ import SortListComponent, {SortType} from '../components/sort-list.js';
 
 import MovieController from './movie-controller.js';
 
-import {generateNavigation} from '../mock/navigation.js';
-
 import {render, RenderPosition, remove} from '../utils/render.js';
 
 const ExtraFilmType = {
@@ -36,6 +34,12 @@ export default class PageController {
 
     this._cards = [];
     this._showedCardsFilm = [];
+    this._watchListMovie = [];
+    this._historyMovie = [];
+    this._favoritesMovie = [];
+
+    this._navigationsCounts = {};
+
     this._showingCardsFilmCount = SHOWING_CARD_FILM_COUNT_ON_START;
     this._filmsContainerElement = null;
 
@@ -44,6 +48,7 @@ export default class PageController {
     this._filmsListComponent = new FilmsListComponent();
     this._mostCommentedFilmsListComponent = new ExtraFilmsListComponent(ExtraFilmType.MOST_COMMENTED);
     this._noCardsComponent = new NoCardsComponent();
+    this._siteNavigationComponent = null;
     this._sortComponent = new SortListComponent();
     this._topRatedFilmsListComponent = new ExtraFilmsListComponent(ExtraFilmType.TOP_RATED);
 
@@ -55,11 +60,25 @@ export default class PageController {
   render(cards) {
     this._cards = cards;
 
-    const navigation = generateNavigation();
+    this._watchListMovie = this._cards.filter((it) => {
+      return it.isWatchList === true;
+    });
+    this._historyMovie = this._cards.filter((it) => {
+      return it.isWatched === true;
+    });
+    this._favoritesMovie = this._cards.filter((it) => {
+      return it.isFavorite === true;
+    });
+
+    this._navigationsCounts.watchlistCount = this._watchListMovie.length ? this._watchListMovie.length : 0;
+    this._navigationsCounts.historyCount = this._historyMovie.length ? this._historyMovie.length : 0;
+    this._navigationsCounts.favoritesCount = this._favoritesMovie.length ? this._favoritesMovie.length : 0;
+
+    this._siteNavigationComponent = new SiteNavigationComponent(this._navigationsCounts);
 
     const container = this._container;
 
-    render(container, new SiteNavigationComponent(navigation), RenderPosition.BEFOREEND);
+    render(container, this._siteNavigationComponent, RenderPosition.BEFOREEND);
     render(container, this._sortComponent, RenderPosition.BEFOREEND);
 
     render(container, this._filmsComponent, RenderPosition.BEFOREEND); // Рендерим элемент films где размещаются все списки фильмов если фильмы есть и сообщение заглушка, если фильмов - нет

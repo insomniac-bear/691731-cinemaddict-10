@@ -1,20 +1,14 @@
 import AbstractComponent from './abstract-component.js';
 
-const createNavigationMarkup = (navigation, isActive) => {
-  const {name, count} = navigation;
-
-  return (
-    `<a href="#watchlist" class="main-navigation__item ${isActive ? `main-navigation__item--active` : ``}">
-      ${name}${(name !== `All movies`) ? `<span class="main-navigation__item-count"> ${count}</span>` : ``}
-    </a>`
-  );
-};
-
 const createNavigationTemplate = (navigationsList) => {
-  const navigationsMarkup = navigationsList.map((it, i) => createNavigationMarkup(it, i === 0)).join(`\n`);
+  const {watchlistCount, historyCount, favoritesCount} = navigationsList;
   return (
     `<nav class="main-navigation">
-      ${navigationsMarkup}
+      <a href="#all" class="main-navigation__item main-navigation__item--active">All movies</a>
+      <a href="#watchlist" class="main-navigation__item">Watchlist <span class="main-navigation__item-count">${watchlistCount}</span></a>
+      <a href="#history" class="main-navigation__item">History <span class="main-navigation__item-count">${historyCount}</span></a>
+      <a href="#favorites" class="main-navigation__item">Favorites <span class="main-navigation__item-count">${favoritesCount}</span></a>
+      <a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
     </nav>`
   );
 };

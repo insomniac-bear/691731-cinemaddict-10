@@ -1,5 +1,5 @@
 import {TextPattern} from '../const.js';
-import {getRandomArrayItem, getRandomIntegerNumber, setFormatDate} from '../utils/common.js';
+import {getRandomArrayItem, getRandomIntegerNumber} from '../utils/common.js';
 
 const COMMENT_LENGTH = 4;
 
@@ -29,26 +29,13 @@ const generateAuthor = () => {
 };
 
 const getRandomDate = () => {
-  const currentDate = new Date();
-  const year = getRandomIntegerNumber(2010, 2019);
-  const month = (year < currentDate.getFullYear()) ? getRandomIntegerNumber(0, 11) : getRandomIntegerNumber(0, currentDate.getMonth());
-  const day = (year < currentDate.getFullYear && month < currentDate.getMonth) ? getRandomIntegerNumber(1, 31) : getRandomIntegerNumber(0, currentDate.getDate());
-  const hour = getRandomIntegerNumber(0, 23);
-  const minutes = getRandomIntegerNumber(0, 59);
-  const date = new Date(year, month, day);
+  const targetDate = new Date();
+  const sign = Math.random() > 0.5 ? 1 : -1;
+  const diffValue = sign * getRandomIntegerNumber(0, 7);
 
-  date.setHours(hour);
-  date.setMinutes(minutes);
+  targetDate.setDate(targetDate.getDate() + diffValue);
 
-  const timeInterval = (Date.now() - date.getTime()) / 10000 / 360 / 60;
-
-  if (timeInterval === 0) {
-    return `Today`;
-  } else if (timeInterval <= 2) {
-    return `${timeInterval} days ago`;
-  } else {
-    return `${date.getFullYear()}/${setFormatDate(date.getMonth())}/${setFormatDate(date.getDate())} ${setFormatDate(date.getHours())}:${setFormatDate(date.getMinutes())}`;
-  }
+  return targetDate;
 };
 
 const generateComment = () => {
