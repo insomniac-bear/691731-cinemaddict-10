@@ -1,5 +1,5 @@
 import {TextPattern} from '../const.js';
-import {getRandomIntegerNumber, getRandomArrayItem, setFormatDate} from '../utils/common.js';
+import {getRandomIntegerNumber, getRandomArrayItem} from '../utils/common.js';
 
 const SENTENCE_COUNT = 3;
 
@@ -57,20 +57,13 @@ const generateFilmDescription = () => {
 };
 
 const generateFilmDate = () => {
-  const year = getRandomIntegerNumber(2010, 2019);
-  const month = getRandomIntegerNumber(0, 11);
-  const day = getRandomIntegerNumber(1, 31);
-  const date = new Date();
+  const targetDate = new Date();
+  const sign = Math.random() > 0.5 ? 1 : -1;
+  const diffValue = sign * getRandomIntegerNumber(0, 7);
 
-  date.setFullYear(year);
-  date.setMonth(month);
-  date.setDate(day);
+  targetDate.setDate(targetDate.getDate() + diffValue);
 
-  return {
-    day: setFormatDate(date.getDate()),
-    month: date.getMonth(),
-    year: date.getFullYear(),
-  };
+  return targetDate;
 };
 
 const generateFilmStyles = (styles) => {
@@ -89,6 +82,9 @@ const generateFilmCards = () => {
       filmDuration: generateFilmDuration(),
       filmStyles: new Set(generateFilmStyles(Generes)),
       filmDescription: generateFilmDescription(),
+      isWatchList: Math.random() > 0.5,
+      isWatched: Math.random() > 0.5,
+      isFavorite: Math.random() > 0.5,
       commentsCount: getRandomIntegerNumber(0, 10),
     };
   });
