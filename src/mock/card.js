@@ -1,4 +1,5 @@
 import {TextPattern} from '../const.js';
+import {generateComments} from './comments.js';
 import {getRandomIntegerNumber, getRandomArrayItem} from '../utils/common.js';
 
 const SENTENCE_COUNT = 3;
@@ -75,6 +76,7 @@ const generateFilmStyles = (styles) => {
 const generateFilmCards = () => {
   return filmNames.map((it) => {
     return {
+      id: String(new Date() + Math.random()),
       filmName: it,
       img: getRandomArrayItem(posterImages),
       filmRating: generateFilmRating(),
@@ -82,10 +84,10 @@ const generateFilmCards = () => {
       filmDuration: generateFilmDuration(),
       filmStyles: new Set(generateFilmStyles(Generes)),
       filmDescription: generateFilmDescription(),
-      isWatchList: Math.random() > 0.5,
+      isWatchlist: Math.random() > 0.5,
       isWatched: Math.random() > 0.5,
       isFavorite: Math.random() > 0.5,
-      commentsCount: getRandomIntegerNumber(0, 10),
+      comments: generateComments(getRandomIntegerNumber(0, 10)),
     };
   });
 };

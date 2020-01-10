@@ -35,7 +35,7 @@ const createButtonMarkup = (name, isActive) => {
 };
 
 const createCardFilmTemplate = (card) => {
-  const {img, filmName, filmRating, filmDate, filmDuration, filmStyles, filmDescription, isWatchList, isWatched, isFavorite, commentsCount} = card;
+  const {img, filmName, filmRating, filmDate, filmDuration, filmStyles, filmDescription, isWatchlist, isWatched, isFavorite, comments} = card;
   const generes = Array.from(filmStyles);
 
   return (
@@ -48,10 +48,10 @@ const createCardFilmTemplate = (card) => {
         <span class="film-card__genre">${generes[0]}</span>
       </p>
       <img src="${img}" alt="" class="film-card__poster">
-      <p class="film-card__description">${filmDescription}</p>
-      <a class="film-card__comments">${commentsCount} comments</a>
+      <p class="film-card__description">${filmDescription.length < 140 ? filmDescription : `${filmDescription.substring(0, 139)}...`}</p>
+      <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
-        ${createButtonMarkup(`watchlist`, isWatchList)}
+        ${createButtonMarkup(`watchlist`, isWatchlist)}
         ${createButtonMarkup(`watched`, isWatched)}
         ${createButtonMarkup(`favorite`, isFavorite)}
       </form>

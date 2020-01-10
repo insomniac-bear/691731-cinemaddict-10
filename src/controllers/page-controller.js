@@ -3,9 +3,9 @@ import ExtraFilmsListComponent from '../components/extra-film-list.js';
 import FilmsComponent from '../components/films.js';
 import FilmsListComponent from '../components/films-list.js';
 import NoCardsComponent from '../components/no-cards.js';
-import SiteNavigationComponent from '../components/site-navigation.js';
 import SortListComponent, {SortType} from '../components/sort-list.js';
 
+import FilterController from './filter-controller.js';
 import MovieController from './movie-controller.js';
 
 import {render, RenderPosition, remove} from '../utils/render.js';
@@ -29,14 +29,11 @@ const renderCardsList = (cardsListElement, cards, onDataChange, onViewChange) =>
 
 // Тело контроллера
 export default class PageController {
-  constructor(container) {
+  constructor(container, cardsModel) {
     this._container = container;
+    this._cardsModel = cardsModel;
 
-    this._cards = [];
-    this._showedCardsFilm = [];
-    this._watchListMovie = [];
-    this._historyMovie = [];
-    this._favoritesMovie = [];
+    this._showedCardControllers = [];
 
     this._navigationsCounts = {};
 
@@ -48,142 +45,157 @@ export default class PageController {
     this._filmsListComponent = new FilmsListComponent();
     this._mostCommentedFilmsListComponent = new ExtraFilmsListComponent(ExtraFilmType.MOST_COMMENTED);
     this._noCardsComponent = new NoCardsComponent();
-    this._siteNavigationComponent = null;
     this._sortComponent = new SortListComponent();
     this._topRatedFilmsListComponent = new ExtraFilmsListComponent(ExtraFilmType.TOP_RATED);
 
     this._onDataChange = this._onDataChange.bind(this);
     this._onViewChange = this._onViewChange.bind(this);
+    this._onButtonShowMoreClick = this._onButtonShowMoreClick.bind(this);
+    this._onSortChange = this._onSortChange.bind(this);
+    this._onFilterChange = this._onFilterChange.bind(this);
+
+    this._cardsModel.setFilterChangeHandler(this._onFilterChange);
   }
 
 
-  render(cards) {
-    this._cards = cards;
-
-    this._watchListMovie = this._cards.filter((it) => {
-      return it.isWatchList === true;
-    });
-    this._historyMovie = this._cards.filter((it) => {
-      return it.isWatched === true;
-    });
-    this._favoritesMovie = this._cards.filter((it) => {
-      return it.isFavorite === true;
-    });
-
-    this._navigationsCounts.watchlistCount = this._watchListMovie.length ? this._watchListMovie.length : 0;
-    this._navigationsCounts.historyCount = this._historyMovie.length ? this._historyMovie.length : 0;
-    this._navigationsCounts.favoritesCount = this._favoritesMovie.length ? this._favoritesMovie.length : 0;
-
-    this._siteNavigationComponent = new SiteNavigationComponent(this._navigationsCounts);
+  render() {
+    const cardsModel = this._cardsModel;
+    const cards = cardsModel.getCards(); // Получаем карточки из модели
 
     const container = this._container;
 
-    render(container, this._siteNavigationComponent, RenderPosition.BEFOREEND);
+    const filterController = new FilterController(container, cardsModel);
+    filterController.render();
+
     render(container, this._sortComponent, RenderPosition.BEFOREEND);
 
     render(container, this._filmsComponent, RenderPosition.BEFOREEND); // Рендерим элемент films где размещаются все списки фильмов если фильмы есть и сообщение заглушка, если фильмов - нет
 
     // Проверяем, есть ли фильмы в базе
-    const isFilmCardsEmpty = (this._cards.length === 0) ? true : false;
+    const isFilmCardsEmpty = (cards.length === 0) ? true : false;
 
     if (isFilmCardsEmpty) {
       render(container, this._noCardsComponent, RenderPosition.BEFOREEND); // Если массив карточек пуст - рендерим сообщение-заглушку
       return;
     }
 
+    const filmsElement = this._filmsComponent.getElement();
+
     // Ренедерим основную разметку блока _filmsComponent
-    render(this._filmsComponent.getElement(), this._filmsListComponent, RenderPosition.BEFOREEND);
-    render(this._filmsComponent.getElement(), this._topRatedFilmsListComponent, RenderPosition.BEFOREEND);
-    render(this._filmsComponent.getElement(), this._mostCommentedFilmsListComponent, RenderPosition.BEFOREEND);
+    render(filmsElement, this._filmsListComponent, RenderPosition.BEFOREEND);
+    render(filmsElement, this._topRatedFilmsListComponent, RenderPosition.BEFOREEND);
+    render(filmsElement, this._mostCommentedFilmsListComponent, RenderPosition.BEFOREEND);
 
-    this._filmsListContainerElement = this._filmsListComponent.getElement().querySelector(`.films-list__container`);
-
-    // Рендерим первые 5 карточек фильмов
-    const newCards = renderCardsList(this._filmsListContainerElement, this._cards.slice(0, this._showingCardsFilmCount), this._onDataChange, this._onViewChange);
-    this._showedCardsFilm = this._showedCardsFilm.concat(newCards);
-
+    this._renderCards(cards.slice(0, this._showingCardsFilmCount));
     this._renderLoadMoreButton();
 
-    const popularFilteredCards = this._setFilter(this._cards, SortType.RATING); // Список карточек отсортированных по рейтингу
-    const commentsFilteredCards = this._setFilter(this._cards, SortType.COMMENTS); // Список карточек отсортированных по количеству комментариев
-
-    renderCardsList(this._topRatedFilmsListComponent.getElement().querySelector(`.films-list__container`), popularFilteredCards.slice(0, 2), this._onDataChange, this._onViewChange); // Рендерим список самых популярных карточек фильмов
-    renderCardsList(this._mostCommentedFilmsListComponent.getElement().querySelector(`.films-list__container`), commentsFilteredCards.slice(0, 2), this._onDataChange, this._onViewChange); // Рендерим список самых комментируемых фильмов
+    // Рендерим по 2 карточки популярных и комментируемых фильмов
+    this._renderPopularCads(cards);
+    this._renderMostCommentedCards(cards);
 
     // Подключаем переключатель сортировки
-    this._sortComponent.setSortTypeChangeHandler((sortType) => {
-      let sortedCards = this._setFilter(this._cards, sortType);
+    this._sortComponent.setSortTypeChangeHandler(this._onSortChange);
+  }
 
-      this._filmsListContainerElement.innerHTML = ``;
-      remove(this._buttonShowMoreComponent);
+  _removeCards() {
+    const filmsListContainerElement = this._filmsListComponent.getElement().querySelector(`.films-list__container`);
+    filmsListContainerElement.innerHTML = ``;
 
-      renderCardsList(this._filmsListContainerElement, sortedCards.slice(0, this._showingCardsFilmCount), this._onDataChange, this._onViewChange);
-      this._renderLoadMoreButton();
-    });
+    this._showedCardControllers = [];
+  }
+
+  _removePopularCards() {
+    const popularFilmsListContainerElement = this._topRatedFilmsListComponent.getElement().querySelector(`.films-list__container`);
+    popularFilmsListContainerElement.innerHTML = ``;
+  }
+
+  _removeMostCommentedCards() {
+    const commentedFilmsListContainerElement = this._mostCommentedFilmsListComponent.getElement().querySelector(`.films-list__container`);
+    commentedFilmsListContainerElement.innerHTML = ``;
+  }
+
+  _renderCards(cards) {
+    const filmsListContainerElement = this._filmsListComponent.getElement().querySelector(`.films-list__container`);
+    const newCards = renderCardsList(filmsListContainerElement, cards, this._onDataChange, this._onViewChange);
+    this._showedCardControllers = this._showedCardControllers.concat(newCards);
+    this._showingCardsFilmCount = this._showedCardControllers.length;
+  }
+
+  _renderPopularCads(cards) {
+    const popularFilmsListContainerElement = this._topRatedFilmsListComponent.getElement().querySelector(`.films-list__container`);
+    renderCardsList(popularFilmsListContainerElement, this._getSortedCards(cards, SortType.RATING).slice(0, 2), this._onDataChange, this._onViewChange);
+  }
+
+  _renderMostCommentedCards(cards) {
+    const commentedFilmsListContainerElement = this._mostCommentedFilmsListComponent.getElement().querySelector(`.films-list__container`);
+    renderCardsList(commentedFilmsListContainerElement, this._getSortedCards(cards, SortType.COMMENTS).slice(0, 2), this._onDataChange, this._onViewChange);
   }
 
   _onDataChange(movieController, oldData, newData) {
-    const index = this._cards.findIndex((it) => it === oldData);
+    const isSuccess = this._cardsModel.updateCard(oldData.id, newData);
 
-    if (index === -1) {
-      return;
+    if (isSuccess) {
+      movieController.render(newData);
+      this._removePopularCards();
+      this._removeMostCommentedCards();
+      this._renderPopularCads(this._cardsModel.getCards());
+      this._renderMostCommentedCards(this._cardsModel.getCards());
     }
-
-    this._cards = [].concat(this._cards.slice(0, index), newData, this._cards.slice(index + 1));
-
-    movieController.render(this._cards[index]);
   }
 
   _onViewChange() {
-    this._showedCardsFilm.forEach((it) => it.setDefaultView());
+    this._showedCardControllers.forEach((it) => it.setDefaultView());
   }
 
+  // Функция обработки клика на кнопке Show more
+  _onButtonShowMoreClick() {
+    const prevCardFilmCount = this._showingCardsFilmCount;
+    const cards = this._cardsModel.getCards();
+    this._showingCardsFilmCount = this._showingCardsFilmCount + SHOWING_CARD_FILM_COUNT_BY_BUTTON;
 
+    this._renderCards(cards.slice(prevCardFilmCount, this._showingCardsFilmCount));
+
+    if (this._showingCardsFilmCount >= cards.length) {
+      remove(this._buttonShowMoreComponent);
+    }
+  }
+
+  // Функция отрисовки кнопки Show more
   _renderLoadMoreButton() {
-    if (this._showingCardsFilmCount >= this._cards.length) {
+    remove(this._buttonShowMoreComponent);
+
+    if (this._showingCardsFilmCount >= this._cardsModel.getCards().length) {
       return;
     }
-
     render(this._filmsListComponent.getElement(), this._buttonShowMoreComponent, RenderPosition.BEFOREEND);
-
-    this._buttonShowMoreComponent.setClickHandler(() => {
-      const prevCardFilmCount = this._showingCardsFilmCount;
-      this._showingCardsFilmCount = this._showingCardsFilmCount + SHOWING_CARD_FILM_COUNT_BY_BUTTON;
-
-      const newCards = renderCardsList(this._filmsListContainerElement, this._cards.slice(prevCardFilmCount, this._showingCardsFilmCount), this._onDataChange, this._onViewChange);
-      this._showedCardsFilm = this._showedCardsFilm.concat(newCards);
-
-      if (this._showingCardsFilmCount >= this._cards.length) {
-        remove(this._buttonShowMoreComponent);
-      }
-    });
+    this._buttonShowMoreComponent.setClickHandler(this._onButtonShowMoreClick);
   }
 
   // Функция сортировки
-  _setFilter(array, value) {
-    const filteredArray = array.slice();
+  _getSortedCards(cardsList, typeOfSort) {
+    const filteredCardsList = cardsList.slice();
 
-    switch (value) {
+    switch (typeOfSort) {
       case `date`:
-        filteredArray.sort((a, b) => {
+        filteredCardsList.sort((a, b) => {
           return b.filmDate - a.filmDate;
         });
         break;
       case `rating`:
-        filteredArray.sort((a, b) => {
+        filteredCardsList.sort((a, b) => {
           if (b.filmRating - a.filmRating === 0) {
-            return b.coomentsCount - a.commentsCount;
+            return b.commentsCount - a.commentsCount;
           } else {
             return b.filmRating - a.filmRating;
           }
         });
         break;
       case `comments`:
-        filteredArray.sort((a, b) => {
-          if (b.commentsCount - a.commentsCount === 0) {
+        filteredCardsList.sort((a, b) => {
+          if (b.comments.length - a.comments.length === 0) {
             return b.filmRating - a.filmRating;
           } else {
-            return b.commentsCount - a.commentsCount;
+            return b.comments.length - a.comments.length;
           }
         });
         break;
@@ -191,6 +203,26 @@ export default class PageController {
         break;
     }
 
-    return filteredArray;
+    return filteredCardsList;
+  }
+
+  _onSortChange(sortType) {
+    let sortedCards = this._getSortedCards(this._cardsModel.getCards(), sortType);
+    this._showingCardsFilmCount = SHOWING_CARD_FILM_COUNT_ON_START;
+
+    this._removeCards();
+    this._renderCards(sortedCards);
+    this._renderLoadMoreButton();
+  }
+
+  _onFilterChange() {
+    this._showingCardsFilmCount = SHOWING_CARD_FILM_COUNT_ON_START;
+    this._removeCards();
+    this._removePopularCards();
+    this._removeMostCommentedCards();
+    this._renderCards(this._cardsModel.getCards());
+    this._renderPopularCads(this._cardsModel.getCards());
+    this._renderMostCommentedCards(this._cardsModel.getCards());
+    this._renderLoadMoreButton();
   }
 }

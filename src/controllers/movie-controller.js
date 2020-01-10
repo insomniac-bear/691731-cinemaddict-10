@@ -15,6 +15,7 @@ export default class MovieController {
     this._onDataChange = onDataChange;
     this._onViewChange = onViewChange;
 
+    this._caqrd = null;
     this._filmCardComponent = null;
     this._filmDetailsComponent = null;
     this._filmDetailsContainer = null;
@@ -26,11 +27,12 @@ export default class MovieController {
 
   // Публичный метод добавления карточки фильма
   render(card) {
+    this._card = card;
     const oldFilmCardComponent = this._filmCardComponent;
     const oldFilmDetailsComponent = this._filmDetailsComponent;
 
-    this._filmCardComponent = new FilmCardComponent(card);
-    this._filmDetailsComponent = new FilmDetailsComponent(card);
+    this._filmCardComponent = new FilmCardComponent(this._card);
+    this._filmDetailsComponent = new FilmDetailsComponent(this._card);
 
     // Подписываемся на клики по карточке фильма
     this._filmCardComponent.setOpenDetailsButtonsClickHandler(() => {
@@ -45,8 +47,16 @@ export default class MovieController {
       this._mode = Mode.OPENED;
 
       // Подписываемся на кнопки попапа
-      this._filmDetailsComponent.setCloseButtonClickHandler((evt) => this._onClickCloseButton(evt));
-      document.addEventListener(`keydown`, this._onEscKeyDown);
+      if (this._card.comments.length > 0) {
+        this._filmDetailsComponent.setDeleteCommentButtonsClickHandler((deletingCommentIndex) => {
+          this._card.comments.splice(deletingCommentIndex, 1);
+          const data = this._filmDetailsComponent.getData();
+          this._onDataChange(this, this._card, data);
+        });
+      }
+      this._filmDetailsComponent.setSubmitCommentHandler();
+      this._filmDetailsComponent.setCloseButtonClickHandler((evt) => this._onClickCloseButton(evt, this._card));
+      document.addEventListener(`keydown`, (evt) => this._onEscKeyDown(evt, this._card));
     });
 
     if (oldFilmCardComponent && oldFilmDetailsComponent) {
@@ -58,22 +68,22 @@ export default class MovieController {
     // Подписываемся на клик по кнопке addToWatchList
     this._filmCardComponent.setWatchListButton((evt) => {
       evt.preventDefault();
-      this._onDataChange(this, card, Object.assign({}, card, {
-        isWatchList: !card.isWatchList,
+      this._onDataChange(this, this._card, Object.assign({}, this._card, {
+        isWatchlist: !this._card.isWatchlist,
       }));
     });
     // Подписываемся на клик по кнопке addToWatched
     this._filmCardComponent.setWatchedButton((evt) => {
       evt.preventDefault();
-      this._onDataChange(this, card, Object.assign({}, card, {
-        isWatched: !card.isWatched,
+      this._onDataChange(this, this._card, Object.assign({}, this._card, {
+        isWatched: !this._card.isWatched,
       }));
     });
     // Подписываемся на клик по кнопке addToFavorite
     this._filmCardComponent.setFavoriteButton((evt) => {
       evt.preventDefault();
-      this._onDataChange(this, card, Object.assign({}, card, {
-        isFavorite: !card.isFavorite,
+      this._onDataChange(this, this._card, Object.assign({}, this._card, {
+        isFavorite: !this._card.isFavorite,
       }));
     });
   }
@@ -86,6 +96,8 @@ export default class MovieController {
 
   _onClickCloseButton(evt) {
     evt.preventDefault();
+    const data = this._filmDetailsComponent.getData();
+    this._onDataChange(this, this._card, data);
     remove(this._filmDetailsComponent);
     remove(this._filmDetailsContainer);
     this._mode = Mode.DEFAULT;

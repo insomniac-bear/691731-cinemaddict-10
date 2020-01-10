@@ -11,8 +11,12 @@ const surnamesOfCommentAuthor = [
   `Macoveev`, `Doe`, `Conor`, `Lebovski`
 ];
 
-const urlEmoji = [
-  `./images/emoji/angry.png`, `./images/emoji/puke.png`, `./images/emoji/sleeping.png`, `./images/emoji/smile.png`, `./images/emoji/trophy.png`
+const emoji = [
+  `SMILE`,
+  `SLEEPING`,
+  `GPUKE`,
+  `ANGRY`,
+  `TROPHY`,
 ];
 
 const generateTextComment = () => {
@@ -43,7 +47,7 @@ const generateComment = () => {
     textComment: generateTextComment(),
     date: getRandomDate(),
     author: generateAuthor(),
-    emoji: getRandomArrayItem(urlEmoji),
+    emoji: getRandomArrayItem(emoji),
   };
 };
 
