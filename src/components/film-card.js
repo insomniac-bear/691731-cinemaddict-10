@@ -44,7 +44,7 @@ const createCardFilmTemplate = (card) => {
       <p class="film-card__rating">${filmRating}</p>
       <p class="film-card__info">
         <span class="film-card__year">${moment(filmDate).format(`YYYY`)}</span>
-        <span class="film-card__duration">${filmDuration}</span>
+        <span class="film-card__duration">${Math.trunc(filmDuration / 60)}h ${filmDuration % 60}m</span>
         <span class="film-card__genre">${generes[0]}</span>
       </p>
       <img src="${img}" alt="" class="film-card__poster">

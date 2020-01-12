@@ -1,46 +1,59 @@
 import AbstractComponent from './abstract-component.js';
 
-const FILTER_ID_PREFIX = `filter__`;
-const getFilterNameById = (id) => {
-  return id.substring(FILTER_ID_PREFIX.length);
-};
+const ACTIVE_CLASS = `main-navigation__item--active`;
 
-const createFilerMarkup = (filter, isActive) => {
-  const {name, count} = filter;
-
-  return (
-    `<a href="#${name}"
-        id="filter__${name}"
-        class="main-navigation__item ${isActive ? `main-navigation__item--active` : ``}"
-    >${name} <span class="main-navigation__item-count">${count}</span></a>`
-  );
-};
-
-const createNavigationTemplate = (filters) => {
-  const filtersMarkup = filters.map((it) => createFilerMarkup(it, it.isActive)).join(`\n`);
+const createNavigationTemplate = (counts) => {
+  const {allCount, watchlistCount, historyCount, favoritesCount} = counts;
   return (
     `<nav class="main-navigation">
-      ${filtersMarkup}
-      <a href="#stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
+      <a href="#all"
+        id="all"
+        class="main-navigation__item ${ACTIVE_CLASS}">
+        All movies
+        <span class="main-navigation__item-count">${allCount}</span>
+      </a>
+      <a href="#watchlist"
+        id="watchlist"
+        class="main-navigation__item">
+        Watchlist
+        <span class="main-navigation__item-count">${watchlistCount}</span>
+      </a>
+      <a href="#history"
+        id="history"
+        class="main-navigation__item">
+        History
+        <span class="main-navigation__item-count">${historyCount}</span>
+      </a>
+      <a href="#favorites"
+        id="favorites"
+        class="main-navigation__item">
+        Favorites
+        <span class="main-navigation__item-count">${favoritesCount}</span>
+      </a>
+      <a href="#stats" id="stats" class="main-navigation__item main-navigation__item--additional">Stats</a>
     </nav>`
   );
 };
 
 export default class SiteNavigation extends AbstractComponent {
-  constructor(filters) {
+  constructor(filtersCount) {
     super();
 
-    this._filters = filters;
+    this._activeItem = `all`;
+    this._filtersCount = filtersCount;
   }
 
   getTemplate() {
-    return createNavigationTemplate(this._filters);
+    return createNavigationTemplate(this._filtersCount, this._activeItem);
   }
 
-  setFilterChangeHandler(handler) {
-    this.getElement().addEventListener(`click`, (evt) => {
-      const filterName = getFilterNameById(evt.target.id);
-      handler(filterName);
-    });
+  setActiveItem(itemId) {
+    if (itemId === this._activeItem) {
+      return;
+    }
+
+    this.getElement().querySelector(`#${this._activeItem}`).classList.remove(ACTIVE_CLASS);
+    this.getElement().querySelector(`#${itemId}`).classList.add(ACTIVE_CLASS);
+    this._activeItem = itemId;
   }
 }

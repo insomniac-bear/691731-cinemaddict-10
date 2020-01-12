@@ -5,7 +5,6 @@ import FilmsListComponent from '../components/films-list.js';
 import NoCardsComponent from '../components/no-cards.js';
 import SortListComponent, {SortType} from '../components/sort-list.js';
 
-import FilterController from './filter-controller.js';
 import MovieController from './movie-controller.js';
 
 import {render, RenderPosition, remove} from '../utils/render.js';
@@ -57,15 +56,21 @@ export default class PageController {
     this._cardsModel.setFilterChangeHandler(this._onFilterChange);
   }
 
+  hide() {
+    this._sortComponent.hide();
+    this._filmsComponent.hide();
+  }
+
+  show() {
+    this._sortComponent.show();
+    this._filmsComponent.show();
+  }
 
   render() {
     const cardsModel = this._cardsModel;
     const cards = cardsModel.getCards(); // Получаем карточки из модели
 
     const container = this._container;
-
-    const filterController = new FilterController(container, cardsModel);
-    filterController.render();
 
     render(container, this._sortComponent, RenderPosition.BEFOREEND);
 
@@ -211,7 +216,11 @@ export default class PageController {
     this._showingCardsFilmCount = SHOWING_CARD_FILM_COUNT_ON_START;
 
     this._removeCards();
-    this._renderCards(sortedCards);
+    if (sortType === `default`) {
+      this._renderCards(sortedCards.slice(0, this._showingCardsFilmCount));
+    } else {
+      this._renderCards(sortedCards);
+    }
     this._renderLoadMoreButton();
   }
 
@@ -220,7 +229,7 @@ export default class PageController {
     this._removeCards();
     this._removePopularCards();
     this._removeMostCommentedCards();
-    this._renderCards(this._cardsModel.getCards());
+    this._renderCards(this._cardsModel.getCards().slice(0, this._showingCardsFilmCount));
     this._renderPopularCads(this._cardsModel.getCards());
     this._renderMostCommentedCards(this._cardsModel.getCards());
     this._renderLoadMoreButton();

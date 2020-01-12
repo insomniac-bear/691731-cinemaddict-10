@@ -40,10 +40,6 @@ const Generes = [
   `science fiction`
 ];
 
-const generateFilmDuration = () => {
-  return `${getRandomIntegerNumber(0, 2)}h ${getRandomIntegerNumber(0, 59)}m`;
-};
-
 const generateFilmRating = () => {
   return `${getRandomIntegerNumber(0, 9)}.${getRandomIntegerNumber(0, 9)}`;
 };
@@ -81,7 +77,7 @@ const generateFilmCards = () => {
       img: getRandomArrayItem(posterImages),
       filmRating: generateFilmRating(),
       filmDate: generateFilmDate(),
-      filmDuration: generateFilmDuration(),
+      filmDuration: getRandomIntegerNumber(0, 180),
       filmStyles: new Set(generateFilmStyles(Generes)),
       filmDescription: generateFilmDescription(),
       isWatchlist: Math.random() > 0.5,

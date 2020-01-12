@@ -16,7 +16,6 @@ const emoji = [
   `SLEEPING`,
   `GPUKE`,
   `ANGRY`,
-  `TROPHY`,
 ];
 
 const generateTextComment = () => {

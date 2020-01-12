@@ -163,7 +163,7 @@ const createFilmDetailsTemplate = (card, emojiComment = {}) => {
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Runtime</td>
-                <td class="film-details__cell">${filmDuration}</td>
+                <td class="film-details__cell">${Math.trunc(filmDuration / 60)}h ${filmDuration % 60}m</td>
               </tr>
               <tr class="film-details__row">
                 <td class="film-details__term">Country</td>
@@ -260,10 +260,9 @@ export default class FilmDetails extends AbstractSmartComponent {
   _subscribeOnEvents() {
     const element = this.getElement();
 
-    element.querySelector(`#watchlist`)
-      .addEventListener(`change`, () => {
-        this._card.isWatchlist = !this._card.isWatchlist;
-      });
+    element.querySelector(`#watchlist`).addEventListener(`change`, () => {
+      this._card.isWatchlist = !this._card.isWatchlist;
+    });
 
     element.querySelector(`#watched`)
       .addEventListener(`change`, () => {

@@ -12,7 +12,7 @@ export default class FilterController {
     this._siteNavigationComponent = null;
 
     this._onDataChange = this._onDataChange.bind(this);
-    this._onFilterChange = this._onFilterChange.bind(this);
+    this._handler = null;
 
     this._cardsModel.setDataChangeHandler(this._onDataChange);
   }
@@ -20,17 +20,15 @@ export default class FilterController {
   render() {
     const container = this._container;
     const allCards = this._cardsModel.getCardsAll();
-    const filters = Object.values(FilterType).map((filterType) => {
-      return {
-        name: filterType,
-        count: getCardsByFilter(allCards, filterType).length,
-        isActive: filterType === this._activeFilterType,
-      };
-    });
+    const counts = {
+      allCount: allCards.length,
+      watchlistCount: getCardsByFilter(allCards, FilterType.WATCHLIST).length,
+      historyCount: getCardsByFilter(allCards, FilterType.HISTORY).length,
+      favoritesCount: getCardsByFilter(allCards, FilterType.FAVORITES).length,
+    };
     const oldComponent = this._siteNavigationComponent;
 
-    this._siteNavigationComponent = new SiteNavigationComponent(filters);
-    this._siteNavigationComponent.setFilterChangeHandler(this._onFilterChange);
+    this._siteNavigationComponent = new SiteNavigationComponent(counts);
 
     if (oldComponent) {
       replace(this._siteNavigationComponent, oldComponent);
@@ -39,13 +37,18 @@ export default class FilterController {
     }
   }
 
-  _onFilterChange(filterType) {
-    this._cardsModel.setFilter(filterType);
-    this._activeFilterType = filterType;
-    this.render();
+  onNavigationChange(handler) {
+    this._siteNavigationComponent.getElement().addEventListener(`click`, (evt) => {
+      const navigationItemName = evt.target.id;
+
+      this._siteNavigationComponent.setActiveItem(navigationItemName);
+      handler(navigationItemName);
+    });
+    this._handler = handler;
   }
 
   _onDataChange() {
     this.render();
+    this.onNavigationChange(this._handler);
   }
 }
