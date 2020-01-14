@@ -35,25 +35,24 @@ const createButtonMarkup = (name, isActive) => {
 };
 
 const createCardFilmTemplate = (card) => {
-  const {img, filmName, filmRating, filmDate, filmDuration, filmStyles, filmDescription, isWatchlist, isWatched, isFavorite, comments} = card;
-  const generes = Array.from(filmStyles);
+  const {comments, filmInfo, userDetails} = card;
 
   return (
     `<article class="film-card">
-      <h3 class="film-card__title">${filmName}</h3>
-      <p class="film-card__rating">${filmRating}</p>
+      <h3 class="film-card__title">${filmInfo.title}</h3>
+      <p class="film-card__rating">${filmInfo.totalRating}</p>
       <p class="film-card__info">
-        <span class="film-card__year">${moment(filmDate).format(`YYYY`)}</span>
-        <span class="film-card__duration">${Math.trunc(filmDuration / 60)}h ${filmDuration % 60}m</span>
-        <span class="film-card__genre">${generes[0]}</span>
+        <span class="film-card__year">${moment(filmInfo.release.date).format(`YYYY`)}</span>
+        <span class="film-card__duration">${Math.trunc(filmInfo.runtime / 60)}h ${filmInfo.runtime % 60}m</span>
+        <span class="film-card__genre">${filmInfo.genre[0]}</span>
       </p>
-      <img src="${img}" alt="" class="film-card__poster">
-      <p class="film-card__description">${filmDescription.length < 140 ? filmDescription : `${filmDescription.substring(0, 139)}...`}</p>
+      <img src="${filmInfo.poster}" alt="" class="film-card__poster">
+      <p class="film-card__description">${filmInfo.description.length < 140 ? filmInfo.description : `${filmInfo.description.substring(0, 139)}...`}</p>
       <a class="film-card__comments">${comments.length} comments</a>
       <form class="film-card__controls">
-        ${createButtonMarkup(`watchlist`, isWatchlist)}
-        ${createButtonMarkup(`watched`, isWatched)}
-        ${createButtonMarkup(`favorite`, isFavorite)}
+        ${createButtonMarkup(`watchlist`, userDetails.isWatchlist)}
+        ${createButtonMarkup(`watched`, userDetails.isWatched)}
+        ${createButtonMarkup(`favorite`, userDetails.isFavorite)}
       </form>
     </article>`
   );

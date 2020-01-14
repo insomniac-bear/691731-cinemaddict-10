@@ -5,50 +5,50 @@ import {UserRank, FilterType} from '../const.js';
 import {getCardsByFilter} from '../utils/filter.js';
 
 const getAllTimesOfMovies = (movies) => {
-  return movies.reduce((acc, it) => acc + it.filmDuration, 0);
+  return movies.reduce((acc, it) => acc + it.filmInfo.runtime, 0);
 };
 
-const generateUserRank = (userStatus) => {
-  if (userStatus <= 0) {
+const generateUserRank = (countOfWatchedFilms) => {
+  if (countOfWatchedFilms <= 0) {
     return ``;
-  } else if (userStatus >= 1 && userStatus <= 10) {
+  } else if (countOfWatchedFilms >= 1 && countOfWatchedFilms <= 10) {
     return UserRank.NOVICE;
-  } else if (userStatus >= 11 && userStatus <= 20) {
+  } else if (countOfWatchedFilms >= 11 && countOfWatchedFilms <= 20) {
     return UserRank.FAN;
   } else {
     return UserRank.MOVIE_BUFF;
   }
 };
 
-const getAllGeneres = (films) => {
-  const generesList = new Set();
+const getAllGenres = (films) => {
+  const genresList = new Set();
   films.forEach((film) => {
-    film.filmStyles.forEach((genere) => {
-      generesList.add(genere);
+    film.filmInfo.genre.forEach((genre) => {
+      genresList.add(genre);
     });
   });
 
-  return Array.from(generesList);
+  return Array.from(genresList);
 };
 
-const calcGenere = (films, genere) => {
-  const filmOfGenere = [];
+const calcGenre = (films, genre) => {
+  const filmOfGenre = [];
   films.forEach((film) => {
-    const styles = Array.from(film.filmStyles);
-    if (styles.some((it) => it === genere)) {
-      filmOfGenere.push(film);
+    const styles = Array.from(film.filmInfo.genre);
+    if (styles.some((it) => it === genre)) {
+      filmOfGenre.push(film);
     }
   });
 
-  return filmOfGenere.length;
+  return filmOfGenre.length;
 };
 
 const renderBar = (barCtx, cards) => {
-  const watchedFilms = getCardsByFilter(cards, FilterType.HISTORY);
-  const allGenere = getAllGeneres(watchedFilms).map((it) => {
+  const watchedFilms = getCardsByFilter(cards.getCardsAll(), FilterType.HISTORY);
+  const allGenere = getAllGenres(watchedFilms).map((it) => {
     return {
       name: it,
-      count: calcGenere(watchedFilms, it),
+      count: calcGenre(watchedFilms, it),
     };
   });
 
@@ -117,14 +117,14 @@ const renderBar = (barCtx, cards) => {
   });
 };
 
-const createStatisticTemplate = ({cards, userStatistic}) => {
+const createStatisticTemplate = ({cards}) => {
   const watchedFilms = getCardsByFilter(cards, FilterType.HISTORY);
   const moviesCount = watchedFilms.length;
   const totalFilmDuration = getAllTimesOfMovies(watchedFilms);
-  const allGenere = getAllGeneres(watchedFilms).map((it) => {
+  const allGenere = getAllGenres(watchedFilms).map((it) => {
     return {
       name: it,
-      count: calcGenere(watchedFilms, it),
+      count: calcGenre(watchedFilms, it),
     };
   });
 
@@ -137,7 +137,7 @@ const createStatisticTemplate = ({cards, userStatistic}) => {
       <p class="statistic__rank">
         Your rank
         <img class="statistic__img" src="images/bitmap@2x.png" alt="Avatar" width="35" height="35">
-        <span class="statistic__rank-label">${generateUserRank(userStatistic)}</span>
+        <span class="statistic__rank-label">${generateUserRank(watchedFilms.length)}</span>
       </p>
 
       <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
@@ -183,17 +183,16 @@ const createStatisticTemplate = ({cards, userStatistic}) => {
 };
 
 export default class Statistics extends AbstractSmartComponent {
-  constructor({cards, userStatistic}) {
+  constructor({cards}) {
     super();
 
     this._cards = cards;
-    this._userStatictic = userStatistic;
 
     this._barChart = null;
   }
 
   getTemplate() {
-    return createStatisticTemplate({cards: this._cards.getCards(), userStatistic: this._userStatistic});
+    return createStatisticTemplate({cards: this._cards.getCardsAll()});
   }
 
   show() {
@@ -206,7 +205,7 @@ export default class Statistics extends AbstractSmartComponent {
     const element = this.getElement();
 
     const chartCtx = element.querySelector(`.statistic__chart`);
-    this._barChart = renderBar(chartCtx, this._cards.getCards());
+    this._barChart = renderBar(chartCtx, this._cards);
   }
 
   _resetChart() {

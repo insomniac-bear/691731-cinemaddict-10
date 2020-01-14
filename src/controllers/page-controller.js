@@ -18,9 +18,9 @@ const SHOWING_CARD_FILM_COUNT_ON_START = 5;
 const SHOWING_CARD_FILM_COUNT_BY_BUTTON = 5;
 
 // Функция отрисовки списка карточек
-const renderCardsList = (cardsListElement, cards, onDataChange, onViewChange) => {
+const renderCardsList = (cardsListElement, cards, onDataChange, onViewChange, api) => {
   return cards.map((card) => {
-    const movieController = new MovieController(cardsListElement, onDataChange, onViewChange);
+    const movieController = new MovieController(cardsListElement, onDataChange, onViewChange, api);
     movieController.render(card);
     return movieController;
   });
@@ -28,9 +28,10 @@ const renderCardsList = (cardsListElement, cards, onDataChange, onViewChange) =>
 
 // Тело контроллера
 export default class PageController {
-  constructor(container, cardsModel) {
+  constructor(container, cardsModel, api) {
     this._container = container;
     this._cardsModel = cardsModel;
+    this._api = api;
 
     this._showedCardControllers = [];
 
@@ -121,19 +122,19 @@ export default class PageController {
 
   _renderCards(cards) {
     const filmsListContainerElement = this._filmsListComponent.getElement().querySelector(`.films-list__container`);
-    const newCards = renderCardsList(filmsListContainerElement, cards, this._onDataChange, this._onViewChange);
+    const newCards = renderCardsList(filmsListContainerElement, cards, this._onDataChange, this._onViewChange, this._api);
     this._showedCardControllers = this._showedCardControllers.concat(newCards);
     this._showingCardsFilmCount = this._showedCardControllers.length;
   }
 
   _renderPopularCads(cards) {
     const popularFilmsListContainerElement = this._topRatedFilmsListComponent.getElement().querySelector(`.films-list__container`);
-    renderCardsList(popularFilmsListContainerElement, this._getSortedCards(cards, SortType.RATING).slice(0, 2), this._onDataChange, this._onViewChange);
+    renderCardsList(popularFilmsListContainerElement, this._getSortedCards(cards, SortType.RATING).slice(0, 2), this._onDataChange, this._onViewChange, this._api);
   }
 
   _renderMostCommentedCards(cards) {
     const commentedFilmsListContainerElement = this._mostCommentedFilmsListComponent.getElement().querySelector(`.films-list__container`);
-    renderCardsList(commentedFilmsListContainerElement, this._getSortedCards(cards, SortType.COMMENTS).slice(0, 2), this._onDataChange, this._onViewChange);
+    renderCardsList(commentedFilmsListContainerElement, this._getSortedCards(cards, SortType.COMMENTS).slice(0, 2), this._onDataChange, this._onViewChange, this._api);
   }
 
   _onDataChange(movieController, oldData, newData) {
@@ -183,22 +184,22 @@ export default class PageController {
     switch (typeOfSort) {
       case `date`:
         filteredCardsList.sort((a, b) => {
-          return b.filmDate - a.filmDate;
+          return b.filmInfo.release.date - a.filmInfo.release.date;
         });
         break;
       case `rating`:
         filteredCardsList.sort((a, b) => {
-          if (b.filmRating - a.filmRating === 0) {
-            return b.commentsCount - a.commentsCount;
+          if (b.filmInfo.totalRating - a.filmInfo.totalRating === 0) {
+            return b.comments.length - a.comments.length;
           } else {
-            return b.filmRating - a.filmRating;
+            return b.filmInfo.totalRating - a.filmInfo.totalRating;
           }
         });
         break;
       case `comments`:
         filteredCardsList.sort((a, b) => {
           if (b.comments.length - a.comments.length === 0) {
-            return b.filmRating - a.filmRating;
+            return b.filmInfo.totalRating - a.filmInfo.totalRating;
           } else {
             return b.comments.length - a.comments.length;
           }
@@ -226,6 +227,7 @@ export default class PageController {
 
   _onFilterChange() {
     this._showingCardsFilmCount = SHOWING_CARD_FILM_COUNT_ON_START;
+    this._sortComponent.resetButtonsByDefault();
     this._removeCards();
     this._removePopularCards();
     this._removeMostCommentedCards();

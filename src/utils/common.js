@@ -9,7 +9,3 @@ export const getRandomArrayItem = (array) => {
 
   return array[randomIndex];
 };
-
-export const generateUserStatistic = () => {
-  return getRandomIntegerNumber(0, 100);
-};

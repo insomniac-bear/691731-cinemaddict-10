@@ -9,10 +9,10 @@ const footerStatisticTemplate = (statistic) => {
 };
 
 export default class FooterStatistic extends AbstractComponent {
-  constructor(statistic) {
+  constructor({cards}) {
     super();
 
-    this._statistic = statistic;
+    this._statistic = cards.getCardsAll().length;
   }
 
   getTemplate() {
