@@ -31,20 +31,20 @@ export default class MovieController {
   // Публичный метод добавления карточки фильма
   render(card) {
     this._card = card;
-    let commentsList = [];
-    if (this._card.comments.length !== 0) {
-      this._api.getComments(this._card.id)
-      .then((comments) => {
-        this._commentsList = Array.from(comments);
-      });
-    }
 
 
     const oldFilmCardComponent = this._filmCardComponent;
     const oldFilmDetailsComponent = this._filmDetailsComponent;
 
     this._filmCardComponent = new FilmCardComponent(this._card);
-    this._filmDetailsComponent = new FilmDetailsComponent(this._card, commentsList);
+
+    if (this._card.comments.length !== 0) {
+      this._api.getComments(this._card.id)
+      .then((data) => {
+        this._commentsList = Array.from(data.comments);
+        this._filmDetailsComponent = new FilmDetailsComponent(this._card, this._commentsList);
+      });
+    }
 
     // Подписываемся на клики по карточке фильма
     this._filmCardComponent.setOpenDetailsButtonsClickHandler(() => {
@@ -61,9 +61,10 @@ export default class MovieController {
       // Подписываемся на кнопки попапа
       if (this._card.comments.length > 0) {
         this._filmDetailsComponent.setDeleteCommentButtonsClickHandler((deletingCommentIndex) => {
-          this._card.comments.splice(deletingCommentIndex, 1);
-          const data = this._filmDetailsComponent.getData();
-          this._onDataChange(this, this._card, data);
+          const index = this._card.comments.findIndex((it) => it === deletingCommentIndex);
+          this._commentsList.splice(index, 1);
+          // const data = this._filmDetailsComponent.getData();
+          this._onDataChange(this, this._card, null);
         });
       }
 
@@ -83,6 +84,7 @@ export default class MovieController {
         } else {
           this._card.userDetails.watchingDate = null;
         }
+        this._filmDetailsComponent.rerender();
       });
 
       this._filmDetailsComponent.setFavoriteHandler(() => {

@@ -4,6 +4,47 @@ import AbstractSmartComponent from './abstract-smart-component.js';
 import {UserRank, FilterType} from '../const.js';
 import {getCardsByFilter} from '../utils/filter.js';
 
+const Period = {
+  ALL_TIME: `all-time`,
+  TODAY: `today`,
+  WEEK: `week`,
+  MONTH: `month`,
+  YEAR: `year`,
+};
+
+const getCardsFromPeriod = (cards, dateTo, period) => {
+  switch (period) {
+    case Period.ALL_TIME:
+      return cards.filter((card) => {
+        return card.userDetails.watchingDate <= dateTo;
+      });
+    case Period.TODAY:
+      return cards.filter((card) => {
+        return card.userDetails.watchingDate === dateTo;
+      });
+    case Period.WEEK:
+      return cards.filter((card) => {
+        const firstDayOfPeriod = new Date(dateTo);
+        firstDayOfPeriod.setDate(firstDayOfPeriod.getDate() - 7);
+        return card.userDetails.watchingDate <= dateTo && card.userDetails.watchingDate >= firstDayOfPeriod;
+      });
+    case Period.MONTH:
+      return cards.filter((card) => {
+        const firstDayOfPeriod = new Date(dateTo);
+        firstDayOfPeriod.setMonth(firstDayOfPeriod.getMonth() - 1);
+        return card.userDetails.watchingDate <= dateTo && card.userDetails.watchingDate >= firstDayOfPeriod;
+      });
+    case Period.YEAR:
+      return cards.filter((card) => {
+        const firstDayOfPeriod = new Date(dateTo);
+        firstDayOfPeriod.setFullYear(firstDayOfPeriod.getFullYear() - 1);
+        return card.userDetails.watchingDate <= dateTo && card.userDetails.watchingDate >= firstDayOfPeriod;
+      });
+  }
+
+  return cards;
+};
+
 const getAllTimesOfMovies = (movies) => {
   return movies.reduce((acc, it) => acc + it.filmInfo.runtime, 0);
 };
@@ -20,35 +61,37 @@ const generateUserRank = (countOfWatchedFilms) => {
   }
 };
 
-const getAllGenres = (films) => {
-  const genresList = new Set();
+const getAllGeneres = (films) => {
+  const generesList = new Set();
   films.forEach((film) => {
-    film.filmInfo.genre.forEach((genre) => {
-      genresList.add(genre);
+    film.filmInfo.genre.forEach((genere) => {
+      generesList.add(genere);
     });
   });
 
-  return Array.from(genresList);
+  return Array.from(generesList);
 };
 
-const calcGenre = (films, genre) => {
-  const filmOfGenre = [];
+const calcGenere = (films, genre) => {
+  const filmOfGenere = [];
   films.forEach((film) => {
     const styles = Array.from(film.filmInfo.genre);
     if (styles.some((it) => it === genre)) {
-      filmOfGenre.push(film);
+      filmOfGenere.push(film);
     }
   });
 
-  return filmOfGenre.length;
+  return filmOfGenere.length;
 };
 
-const renderBar = (barCtx, cards) => {
-  const watchedFilms = getCardsByFilter(cards.getCardsAll(), FilterType.HISTORY);
-  const allGenere = getAllGenres(watchedFilms).map((it) => {
+const renderBar = (barCtx, cards, dateTo, period) => {
+  const watchedFilms = getCardsByFilter(cards, FilterType.HISTORY);
+  const cardsFromPeriod = getCardsFromPeriod(watchedFilms, dateTo, period);
+
+  const allGenere = getAllGeneres(cardsFromPeriod).map((it) => {
     return {
       name: it,
-      count: calcGenre(watchedFilms, it),
+      count: calcGenere(cardsFromPeriod, it),
     };
   });
 
@@ -117,14 +160,15 @@ const renderBar = (barCtx, cards) => {
   });
 };
 
-const createStatisticTemplate = ({cards}) => {
+const createStatisticTemplate = ({cards, dateTo, period}) => {
   const watchedFilms = getCardsByFilter(cards, FilterType.HISTORY);
-  const moviesCount = watchedFilms.length;
-  const totalFilmDuration = getAllTimesOfMovies(watchedFilms);
-  const allGenere = getAllGenres(watchedFilms).map((it) => {
+  const cardsFromPeriod = getCardsFromPeriod(watchedFilms, dateTo, period);
+  const moviesCount = cardsFromPeriod.length;
+  const totalFilmDuration = getAllTimesOfMovies(cardsFromPeriod);
+  const allGenere = getAllGeneres(cardsFromPeriod).map((it) => {
     return {
       name: it,
-      count: calcGenre(watchedFilms, it),
+      count: calcGenere(cardsFromPeriod, it),
     };
   });
 
@@ -143,19 +187,23 @@ const createStatisticTemplate = ({cards}) => {
       <form action="https://echo.htmlacademy.ru/" method="get" class="statistic__filters">
         <p class="statistic__filters-description">Show stats:</p>
 
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" checked>
+        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-all-time" value="all-time" ${period === `all-time` ? `checked` : ``}>
         <label for="statistic-all-time" class="statistic__filters-label">All time</label>
 
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today">
+        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-today" value="today"
+        ${period === `today` ? `checked` : ``}>
         <label for="statistic-today" class="statistic__filters-label">Today</label>
 
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week">
+        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-week" value="week"
+        ${period === `week` ? `checked` : ``}>
         <label for="statistic-week" class="statistic__filters-label">Week</label>
 
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month">
+        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-month" value="month"
+        ${period === `month` ? `checked` : ``}>
         <label for="statistic-month" class="statistic__filters-label">Month</label>
 
-        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year">
+        <input type="radio" class="statistic__filters-input visually-hidden" name="statistic-filter" id="statistic-year" value="year"
+        ${period === `year` ? `checked` : ``}>
         <label for="statistic-year" class="statistic__filters-label">Year</label>
       </form>
 
@@ -170,7 +218,7 @@ const createStatisticTemplate = ({cards}) => {
         </li>
         <li class="statistic__text-item">
           <h4 class="statistic__item-title">Top genre</h4>
-          <p class="statistic__item-text">${allGenere[0].name}</p>
+          <p class="statistic__item-text">${allGenere.length !== 0 ? allGenere[0].name : `none`}</p>
         </li>
       </ul>
 
@@ -183,29 +231,82 @@ const createStatisticTemplate = ({cards}) => {
 };
 
 export default class Statistics extends AbstractSmartComponent {
-  constructor({cards}) {
+  constructor({cards, dateTo}) {
     super();
-
     this._cards = cards;
-
     this._barChart = null;
+
+    this._dateTo = dateTo;
+    this._period = Period.ALL_TIME;
+
+    this._allTimeButton = null;
+    this._todayButton = null;
+    this._weekButton = null;
+    this._monthButton = null;
+    this._yearButton = null;
   }
 
   getTemplate() {
-    return createStatisticTemplate({cards: this._cards.getCardsAll()});
+    return createStatisticTemplate({cards: this._cards.getCardsAll(), dateTo: this._dateTo, period: this._period});
   }
 
   show() {
     super.show();
 
     this._renderChart();
+    this.setPeriodFilterHandler();
+  }
+
+  rerender(cards, period, dateTo) {
+    this._cards = cards;
+    this.dateTo = dateTo;
+    this._period = period;
+
+    super.rerender();
+    this._renderChart();
+  }
+
+  setPeriodFilterHandler() {
+    this._allTimeButton = this.getElement().querySelector(`#statistic-all-time`);
+    this._allTimeButton.addEventListener(`change`, () => {
+      this._period = this._allTimeButton.value;
+      this.rerender(this._cards, this._period, this.dateTo);
+    });
+
+    this._todayButton = this.getElement().querySelector(`#statistic-today`);
+    this._todayButton.addEventListener(`change`, () => {
+      this._period = this._todayButton.value;
+      this.rerender(this._cards, this._period, this.dateTo);
+    });
+
+    this._weekButton = this.getElement().querySelector(`#statistic-week`);
+    this._weekButton.addEventListener(`change`, () => {
+      this._period = this._weekButton.value;
+      this.rerender(this._cards, this._period, this.dateTo);
+    });
+
+    this._monthButton = this.getElement().querySelector(`#statistic-month`);
+    this._monthButton.addEventListener(`change`, () => {
+      this._period = this._monthButton.value;
+      this.rerender(this._cards, this._period, this.dateTo);
+    });
+
+    this._yearButton = this.getElement().querySelector(`#statistic-year`);
+    this._yearButton.addEventListener(`change`, () => {
+      this._period = this._yearButton.value;
+      this.rerender(this._cards, this._period, this.dateTo);
+    });
+  }
+
+  recoveryListeners() {
+    this.setPeriodFilterHandler();
   }
 
   _renderChart() {
     const element = this.getElement();
 
     const chartCtx = element.querySelector(`.statistic__chart`);
-    this._barChart = renderBar(chartCtx, this._cards);
+    this._barChart = renderBar(chartCtx, this._cards.getCards(), this._dateTo, this._period);
   }
 
   _resetChart() {

@@ -10,7 +10,7 @@ export const FilterType = {
 export const EmojiUrl = {
   SMILE: `./images/emoji/smile.png`,
   SLEEPING: `./images/emoji/sleeping.png`,
-  GPUKE: `./images/emoji/puke.png`,
+  PUKE: `./images/emoji/puke.png`,
   ANGRY: `./images/emoji/angry.png`,
 };
 

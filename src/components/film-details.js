@@ -14,36 +14,26 @@ const parseFormData = (formData) => {
   };
 };
 
-const createCommentMarkup = (comment, index) => {
-  const {textComment, date, author, emoji} = comment;
+const createCommentMarkup = (commentData) => {
+  const {id, author, emotion, comment, date} = commentData;
   return (
     `<li class="film-details__comment">
       <span class="film-details__comment-emoji">
-        <img src="${EmojiUrl[emoji.toUpperCase()]}" width="55" height="55" alt="emoji">
+        <img src="${EmojiUrl[emotion.toUpperCase()]}" width="55" height="55" alt="emoji">
       </span>
       <div>
-        <p class="film-details__comment-text">${he.encode(textComment)}</p>
+        <p class="film-details__comment-text">${he.encode(comment)}</p>
         <p class="film-details__comment-info">
           <span class="film-details__comment-author">${author}</span>
           <span class="film-details__comment-day">${moment(date).format(`YYYY/MM/DD HH:MM`)}</span>
           <button
             class="film-details__comment-delete"
-            id="${index}">
+            id="${id}">
             Delete
           </button>
         </p>
       </div>
     </li>`
-  );
-};
-
-const createCheckboxMarkup = (name, isChecked) => {
-  return (
-    `<input type="checkbox"
-      class="film-details__control-input visually-hidden"
-      id="${name}" name="${name}"
-      ${isChecked ? `checked` : ``}>
-    <label for="${name}" class="film-details__control-label film-details__control-label--${name}">Add to ${name}</label>`
   );
 };
 
@@ -92,8 +82,8 @@ const createFilmDetailsReitingMarkup = (poster, title, rating) => {
 
 const generateCommentsList = (comments) => {
   return comments
-    .map((comment, index) => {
-      return createCommentMarkup(comment, index);
+    .map((comment) => {
+      return createCommentMarkup(comment);
     })
     .join(`\n`);
 };
@@ -101,8 +91,6 @@ const generateCommentsList = (comments) => {
 const createFilmDetailsTemplate = (card, commentsList, emojiComment = {}) => {
   const {comments, filmInfo, userDetails} = card;
   const {isEmoji, emojiUrl, emojiName} = emojiComment;
-
-  const commentsMarckup = generateCommentsList(commentsList);
 
   return (
     `<form class="film-details__inner" action="" method="get">
@@ -162,9 +150,21 @@ const createFilmDetailsTemplate = (card, commentsList, emojiComment = {}) => {
           </div>
         </div>
         <section class="film-details__controls">
-          ${createCheckboxMarkup(`watchlist`, userDetails.isWatchlist)}
-          ${createCheckboxMarkup(`watched`, userDetails.isWatched)}
-          ${createCheckboxMarkup(`favorite`, userDetails.isFavorite)}
+          <input type="checkbox"
+            class="film-details__control-input visually-hidden"
+            id="addwatchlist" name="watchlist"
+            ${userDetails.isWatchlist ? `checked` : ``}>
+            <label for="addwatchlist" class="film-details__control-label film-details__control-label--watchlist">Add to watchlist</label>
+            <input type="checkbox"
+            class="film-details__control-input visually-hidden"
+            id="addwatched" name="watched"
+            ${userDetails.isWatched ? `checked` : ``}>
+            <label for="addwatched" class="film-details__control-label film-details__control-label--watched">Alleready watched</label>
+            <input type="checkbox"
+            class="film-details__control-input visually-hidden"
+            id="addfavorite" name="favorite"
+            ${userDetails.isFavorite ? `checked` : ``}>
+            <label for="addfavorite" class="film-details__control-label film-details__control-label--favorite">Add to favorite</label>
         </section>
       </div>
       ${userDetails.isWatched ? createFilmDetailsReitingMarkup(filmInfo.poster, filmInfo.title, userDetails.personalRating) : ``}
@@ -172,7 +172,7 @@ const createFilmDetailsTemplate = (card, commentsList, emojiComment = {}) => {
         <section class="film-details__comments-wrap">
           <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
           <ul class="film-details__comments-list">
-          ${commentsList.length > 0 ? commentsMarckup() : ``}
+          ${generateCommentsList(commentsList)}
           </ul>
           <div class="film-details__new-comment">
             <div for="add-emoji" class="film-details__add-emoji-label">
@@ -190,8 +190,8 @@ const createFilmDetailsTemplate = (card, commentsList, emojiComment = {}) => {
               <label class="film-details__emoji-label" for="emoji-sleeping">
                 <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
               </label>
-              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-gpuke" value="gpuke" ${emojiName === `gpuke` ? `checked` : ``}>
-              <label class="film-details__emoji-label" for="emoji-gpuke">
+              <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-puke" value="puke" ${emojiName === `puke` ? `checked` : ``}>
+              <label class="film-details__emoji-label" for="emoji-puke">
                 <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
               </label>
               <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio"id="emoji-angry" value="angry" ${emojiName === `angry` ? `checked` : ``}>
@@ -211,7 +211,7 @@ export default class FilmDetails extends AbstractSmartComponent {
     super();
 
     this._card = card;
-    this._comments = commentsList;
+    this._comments = commentsList ? commentsList : [];
 
     this._emojiInComment = {
       isEmoji: false,
@@ -266,15 +266,15 @@ export default class FilmDetails extends AbstractSmartComponent {
 
   setWatchlistHandler(handler) {
     this.getElement()
-      .querySelector(`#watchlist`)
-      .addEventListener(`change`, handler);
+      .querySelector(`#addwatchlist`)
+      .addEventListener(`change`, () => handler());
 
     this._watchlistHandler = handler;
   }
 
   setWatchedHandler(handler) {
     this.getElement()
-      .querySelector(`#watched`)
+      .querySelector(`#addwatched`)
       .addEventListener(`change`, () => {
         handler();
         this.rerender();
@@ -285,7 +285,7 @@ export default class FilmDetails extends AbstractSmartComponent {
 
   setFavoriteHandler(handler) {
     this.getElement()
-      .querySelector(`#favorite`)
+      .querySelector(`#addfavorite`)
       .addEventListener(`change`, handler);
 
     this._favoriteHandler = handler;

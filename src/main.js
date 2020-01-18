@@ -13,32 +13,35 @@ import {render, RenderPosition} from './utils/render.js';
 const AUTHORIZATION = `Basic er883jdzbdw666`;
 const END_POINT = `https://htmlacademy-es-10.appspot.com/cinemaddict`;
 
+const dateTo = new Date();
+
 const siteHeaderElement = document.querySelector(`.header`);
 const siteMainElement = document.querySelector(`.main`);
 const footerContainer = document.querySelector(`.footer`);
 
 // подключаем API для работы с сервером
 const api = new API(END_POINT, AUTHORIZATION);
-
 const cardsModel = new CardsModel();
 
-api.getCards()
-  .then((cards) =>{
-    cardsModel.setCards(cards);
-    render(siteHeaderElement, new UserProfileComponent({cards: cardsModel}), RenderPosition.BEFOREEND);
-    filterController.render();
-    filterController.onNavigationChange(navigationHandler);
-    render(siteMainElement, statisticComponent, RenderPosition.BEFOREEND);
-    statisticComponent.hide();
-    render(footerContainer, new FooterComponent({cards: cardsModel}), RenderPosition.BEFOREEND);
-    pageController.render();
-  });
+const statisticComponent = new StatisticsComponent({cards: cardsModel, dateTo});
 
 // подключаем контроллеры
 const filterController = new FilterController(siteMainElement, cardsModel);
 const pageController = new PageController(siteMainElement, cardsModel, api);
 
-const statisticComponent = new StatisticsComponent({cards: cardsModel});
+api.getCards()
+  .then((cards) =>{
+    cardsModel.setCards(cards);
+
+    render(siteHeaderElement, new UserProfileComponent({cards: cardsModel}), RenderPosition.BEFOREEND);
+    filterController.render();
+    pageController.render();
+    render(siteMainElement, statisticComponent, RenderPosition.BEFOREEND);
+    render(footerContainer, new FooterComponent({cards: cardsModel}), RenderPosition.BEFOREEND);
+
+    filterController.onNavigationChange(navigationHandler);
+    statisticComponent.hide();
+  });
 
 const navigationHandler = (itemNavigation) => {
   if (itemNavigation === `stats`) {
@@ -50,5 +53,3 @@ const navigationHandler = (itemNavigation) => {
     cardsModel.setFilter(itemNavigation);
   }
 };
-
-

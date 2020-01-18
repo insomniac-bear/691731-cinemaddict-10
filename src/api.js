@@ -45,9 +45,20 @@ const API = class {
       .then(Card.parseCard);
   }
 
-  createComment() {}
+  createComment() {
+    return this._load({
+      url: `comments`,
+      method: Method.POST,
+      body: JSON.stringify(Comments.toRAW()),
+      headers: new Headers({'Content-Type': `application/json`})
+    })
+      .then((response) => response.json())
+      .then(Comments.parseTask);
+  }
 
-  deleteComment(id) {}
+  deleteComment(id) {
+    return this._load({url: `comments/${id}`, method: Method.DELETE});
+  }
 
   _load({url, method = Method.GET, body = null, headers = new Headers()}) {
     headers.append(`Authorization`, this._authorization);

@@ -8,7 +8,6 @@ export default class AbstractSmartComponent extends AbstractComponent {
   rerender() {
     const oldElemment = this.getElement();
     const parent = oldElemment.parentElement;
-
     this.removeElement();
 
     const newElement = this.getElement();

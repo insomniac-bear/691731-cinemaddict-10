@@ -14,7 +14,7 @@ export const generateUserRank = (userStatus) => {
   }
 };
 
-const createUserProfileTemplate = ({cards}) => {
+const createUserProfileTemplate = (cards) => {
   const userStatistic = getCardsByFilter(cards, FilterType.HISTORY).length;
 
   return (
@@ -29,10 +29,10 @@ export default class UserProfile extends AbstractComponent {
   constructor({cards}) {
     super();
 
-    this._cards = cards;
+    this._cards = cards.getCardsAll();
   }
 
   getTemplate() {
-    return createUserProfileTemplate({cards: this._cards.getCardsAll()});
+    return createUserProfileTemplate(this._cards);
   }
 }
